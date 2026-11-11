@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Go Greg</title>
+    <meta name="description" content="Go Greg: a slot machine game with a bonus where Greg collects diamonds, free games and jackpots." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Go Greg" />
+    <meta property="og:description" content="A slot machine game with a bonus where Greg collects diamonds, free games and jackpots." />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Go Greg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&display=swap" rel="stylesheet" />
+    <!-- The loading screen, shown while main.tsx preloads the images; React replaces it. Styled
+         here because the app's stylesheets load with the game. -->
+    <style>
+      .loading {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin: 0;
+        background: #f4f2ee;
+        color: #1d1d1f;
+        font: 600 1rem system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      .loading-bar {
+        width: 200px;
+        height: 8px;
+        border-radius: 4px;
+        background: #dcd9d2;
+        overflow: hidden;
+      }
+      .loading-bar span {
+        display: block;
+        width: 0;
+        height: 100%;
+        background: #e8c766;
+        transition: width 0.15s;
+      }
+      @media (prefers-color-scheme: dark) {
+        .loading {
+          background: #17181a;
+          color: #ececee;
+        }
+        .loading-bar {
+          background: #3a3b40;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="loading" role="status">
+        Loading…
+        <div class="loading-bar"><span id="loading-progress"></span></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

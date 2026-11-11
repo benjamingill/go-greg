@@ -1,0 +1,3394 @@
+/* Go Greg slot machine. Shared tokens and base styles live in src/theme.css. */
+:root {
+  --cabinet-text: #fff4ea;
+  --reel-text: #2b2b2b;
+  --win-glow: #ffd84d;
+  --gem-green: #2fbf71;
+  --gem-red: #e0453a;
+  --gem-blue: #3a7be0;
+  --tier-mini: #6fb7ff;
+  --tier-minor: #6ee08f;
+  --tier-maxi: #ffb347;
+  --tier-major: #ff6b8b;
+  --tier-grand: #ffd84d;
+  /* Glow colours of the three extras (heaps, faces, labels). */
+  --glow-green: rgb(80, 240, 140);
+  --glow-red: rgb(255, 60, 60);
+  --glow-blue: rgb(100, 170, 255);
+  /* A 1px white edge round a picture (four offset copies), for filter lists. */
+  --white-edge: drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff)
+    drop-shadow(0 -1px 0 #fff);
+  /* Dunkin'-style lettering: a white outline (eight offset copies) and a brown drop shadow.
+     The em one scales with the text. */
+  --dunkin-outline-sm:
+    1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff, 1px 1px 0 #fff, -1px 1px 0 #fff, 1px -1px 0 #fff,
+    -1px -1px 0 #fff, 0 3px 0 #5c2d17;
+  --dunkin-outline:
+    0.05em 0 0 #fff,
+    -0.05em 0 0 #fff,
+    0 0.05em 0 #fff,
+    0 -0.05em 0 #fff,
+    0.035em 0.035em 0 #fff,
+    -0.035em 0.035em 0 #fff,
+    0.035em -0.035em 0 #fff,
+    -0.035em -0.035em 0 #fff,
+    0 0.1em 0 #5c2d17;
+  /* The whole machine's width: the narrowest at which the bet buttons and meters still fit
+     on one row (measured). */
+  --machine-w: 456px;
+  /* 1vw, but never more than 1% of the machine's width, so on a wide screen every vw-based
+     size comes out as it does on the narrowest screen. */
+  --vw: min(1vw, calc(var(--machine-w) / 100));
+  /* Sizes used in more than one place. */
+  --strip-fs: clamp(0.8rem, calc(3.4 * var(--vw)), 1.2rem);
+  --symbol-fs: clamp(1.6rem, calc(8 * var(--vw)), 3rem);
+  --note-fs: clamp(0.4rem, calc(1.5 * var(--vw)), 0.55rem);
+  --splash-gap: clamp(6px, calc(1.6 * var(--vw)), 12px);
+}
+
+/*
+ * Paused (testing): every animation holds where it is. First in the file so
+ * nothing is more specific before it; !important beats each animation's own rule.
+ */
+.paused *,
+.paused *::before,
+.paused *::after {
+  /* biome-ignore lint/complexity/noImportantStyles: has to beat every animation's own rule. */
+  animation-play-state: paused !important;
+}
+
+/*
+ * The machine fills the screen's height. Everything else takes its natural
+ * height and the reels grow to fill what's left, so on a tall phone screen the
+ * reels get taller instead of leaving empty space.
+ */
+.slots {
+  /* The reels, banner and jackpot game are at most this wide (never reached at the
+     machine's width below; kept for wider layouts). */
+  --play-w: 560px;
+  /* The red of the banner bar and the panel behind the reels: faint diagonal stripes over
+     a red that darkens towards the sides. */
+  --panel-red:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0 6px, transparent 6px 14px),
+    linear-gradient(90deg, #7a0e06, #b81e10 18%, #8a1208 50%, #b81e10 82%, #7a0e06);
+  max-width: var(--machine-w);
+  height: 100dvh;
+  margin: 0 auto;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.slots-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- Cabinet ---- */
+
+/* Charcoal at the top warming to glowing embers at the bottom. */
+.cabinet {
+  background:
+    radial-gradient(ellipse 90% 30% at 50% 104%, #ff8a1c 0 30%, #c2410c 55%, transparent 75%),
+    linear-gradient(#2b2b2b, #1c1714 55%, #3a1a0c);
+  color: var(--cabinet-text);
+  border: 1px solid #c2410c;
+  border-radius: 12px;
+  padding: 8px 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ---- Top of the cabinet: jackpots, gem heaps ---- */
+
+.cabinet-top {
+  /* For the backdrop (.features-scene). */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* All five jackpots on one line; plaques shrink to fit narrow screens. */
+.plaques {
+  /* Drawn over the backdrop. */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(3px, calc(1 * var(--vw)), 8px);
+  width: 100%;
+  /* A little room above for the names, which stick up over the plaques' top borders
+     (the Grand's reaches up into the cabinet's 8px padding). */
+  padding-top: 3px;
+}
+
+.plaque {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(#2a1a10, #120a05);
+  border: 3px solid #d4a017;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 0 2px #6b4a0a,
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  /* The top padding clears the lower half of the name sitting on the border. */
+  padding: 0.35rem clamp(4px, calc(1.4 * var(--vw)), 10px) 4px;
+  line-height: 1.1;
+  min-width: 0;
+}
+
+/* The name sits on the plaque's top border, like the machine's: centred on it, half above. */
+.plaque-name {
+  position: absolute;
+  top: -1.5px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  line-height: 1;
+  /* Jackpot names use the Dunkin'-style font (see the .jp-* rules). */
+  font-family: Fredoka, system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: clamp(0.6rem, calc(2.2 * var(--vw)), 0.75rem);
+  /* A dark outline so the name reads over the gold border. */
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0 0 3px #000;
+}
+
+.plaque-amount {
+  color: #fff;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(0.85rem, calc(3.4 * var(--vw)), 1.15rem);
+}
+
+/* Each plaque is as wide as its place in the row says, whatever its amount: widest in the
+   middle, then the two beside it, then the two on the ends. */
+.plaque-big {
+  flex: 0 1 180px;
+  border-color: #3ccf6e;
+  background: linear-gradient(#0f3a1f, #06200f);
+  box-shadow:
+    inset 0 0 0 2px #d4a017,
+    0 0 14px rgba(255, 216, 77, 0.5);
+  padding: 0.45rem clamp(6px, calc(2 * var(--vw)), 18px) 6px;
+}
+.plaque-mid {
+  flex: 0 1 125px;
+}
+.plaque-small {
+  flex: 0 1 105px;
+}
+
+.plaque-big .plaque-name {
+  font-size: clamp(0.7rem, calc(2.6 * var(--vw)), 0.95rem);
+}
+
+.plaque-big .plaque-amount {
+  font-size: clamp(0.95rem, calc(4.2 * var(--vw)), 1.7rem);
+}
+
+.plaque-mid .plaque-amount {
+  font-size: clamp(0.7rem, calc(2.8 * var(--vw)), 1.1rem);
+}
+
+.plaque-small .plaque-amount {
+  font-size: clamp(0.65rem, calc(2.5 * var(--vw)), 0.95rem);
+}
+
+.features {
+  position: relative;
+  display: grid;
+  /* Three equal columns, however wide the labels are. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Each column fills the row's height: faces and labels stay at the top, and any spare
+     height opens up between a label and its heap. */
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  max-width: 640px;
+  /* The heaps run down to just above the reels, leaving a small gap under the banner
+     (the cabinet's 12px gap less 9px). */
+  margin-bottom: -9px;
+  /* The outer heaps are cut off at the sides rather than widening the page. */
+  overflow-x: clip;
+  /* Clipping lets a flex item shrink below its content; the heaps keep their height. */
+  /* Squeezes along with the rest when the screen is short (its faces give a little). */
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+/* The scene behind the jackpots, faces and heaps (see Backdrop.tsx): the whole picture,
+   full width at its own shape, pinned to the top of the cabinet (out over its 8px padding
+   and up to its border). It's first in .cabinet-top and positioned, so the plaques and
+   heaps (positioned, after it) are drawn over it. It stops at the bottom of the top
+   section, so it never covers the reels: when it's taller, the bottom of the coins is cut. */
+.features-scene {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: calc(100% + 16px);
+  height: auto;
+  max-height: calc(100% + 8px);
+  object-fit: cover;
+  object-position: 50% 0;
+  pointer-events: none;
+  /* The cabinet's rounded corners, inside its 1px border. */
+  border-radius: 11px 11px 0 0;
+}
+
+.feature {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition:
+    opacity 0.3s,
+    scale 0.3s,
+    filter 0.3s;
+}
+
+/* A mound of gems (a picture), wider than its column so the heaps overlap, the red one in
+   front. Bigger heaps leave less height for the reels, which take whatever is left. */
+.gem-heap {
+  position: relative;
+  z-index: 1;
+  width: min(135%, 290px, 36dvh);
+  height: auto;
+  /* Sunk down so the mound's base hides behind the banner bar; it's cut off 12px above
+     the bar's bottom, so nothing peeks out past the bar's rounded corners (the glow still
+     spills out at the top and sides). */
+  translate: 0 10%;
+  clip-path: inset(-80px -80px calc(10% + 12px) -80px);
+  /* Stacks the picture and its flash copy (see .heap-img). */
+  display: grid;
+}
+
+.feature-red .gem-heap {
+  z-index: 2;
+  /* Mirrored, so it doesn't look the same as the green and blue heaps. */
+  transform: scaleX(-1);
+}
+
+/* The green and blue heaps behind sit a little higher than the red one in front. */
+.feature-green .gem-heap,
+.feature-blue .gem-heap {
+  translate: 0 2%;
+  clip-path: inset(-80px -80px calc(2% + 12px) -80px);
+}
+/* Each extra's namesake, above its label (like the machine's knights above its banners).
+   64px tall to start with; it takes all the spare height there is, and gives a little when
+   there isn't any, down to 48px. */
+.feature-face {
+  order: -2;
+  position: relative;
+  z-index: 4;
+  flex: 1 1 64px;
+  width: 100%;
+  min-height: 48px;
+  object-fit: contain;
+  /* Livelier colour (a little brighter, more contrast, richer and a touch warmer), then a
+     white edge and a glow in the extra's colour, like the heaps. */
+  filter: brightness(1.1) contrast(1.12) saturate(1.35) sepia(0.08) var(--white-edge)
+    drop-shadow(0 0 8px var(--face-glow));
+}
+
+.feature-green .feature-face {
+  --face-glow: var(--glow-green);
+}
+.feature-red .feature-face {
+  --face-glow: var(--glow-red);
+}
+.feature-blue .feature-face {
+  --face-glow: var(--glow-blue);
+}
+
+.feature-label {
+  /* Above its heap, like the machine's banners above its gem piles (and drawn over
+     any heap that reaches it). */
+  order: -1;
+  position: relative;
+  z-index: 4;
+  margin: 2px 0 auto;
+  /* The Dunkin'-style font. */
+  font-family: Fredoka, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.02rem, calc(4.3 * var(--vw)), 1.8rem);
+  text-transform: uppercase;
+  /* White, outlined in its gem's colour (the stroke is drawn under the fill). */
+  color: #fff;
+  -webkit-text-stroke: 0.3em var(--label-stroke);
+  paint-order: stroke fill;
+  white-space: nowrap;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+.feature-green .feature-label {
+  --label-stroke: #1a8a48;
+}
+.feature-red .feature-label {
+  --label-stroke: #a8231a;
+}
+.feature-blue .feature-label {
+  --label-stroke: #1d4aa8;
+}
+
+/* Each heap's colours: its outline, its glow, and the glow's outer reach. */
+.feature-green .gem-heap {
+  --heap-color: #3ee080;
+  --heap-glow: var(--glow-green);
+  --heap-far: rgb(60, 220, 120);
+}
+.feature-red .gem-heap {
+  --heap-color: #ff3b3b;
+  --heap-glow: var(--glow-red);
+  --heap-far: rgb(255, 40, 40);
+}
+.feature-blue .gem-heap {
+  --heap-color: #4a9bff;
+  --heap-glow: var(--glow-blue);
+  --heap-far: rgb(80, 150, 255);
+}
+
+/* Each heap is lifted a little brighter, outlined in 1px of white then 1px of its own
+   colour, and glows in that colour: solid at the edge and strong right out to its reach
+   (about 32px), like the machine's. */
+.feature .gem-heap {
+  /* Set here, where --heap-color and the glows are, so it picks up this heap's colours. */
+  --heap-edge: var(--white-edge) drop-shadow(1px 0 0 var(--heap-color)) drop-shadow(-1px 0 0 var(--heap-color))
+    drop-shadow(0 1px 0 var(--heap-color)) drop-shadow(0 -1px 0 var(--heap-color)) drop-shadow(0 0 4px var(--heap-glow))
+    drop-shadow(0 0 10px var(--heap-glow)) drop-shadow(0 0 16px var(--heap-glow)) drop-shadow(0 0 32px var(--heap-far));
+}
+
+/* The heap's picture, and its flash copy stacked on it in the same grid cell. */
+.gem-heap > .heap-img {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: brightness(1.25) var(--heap-edge);
+}
+
+.feature.on {
+  /* The separate scale property, so it stacks with the pulse animation's transform. */
+  scale: 1.08;
+  animation: pulse 0.6s ease-in-out infinite alternate;
+}
+
+.feature.off {
+  opacity: 0.3;
+  filter: grayscale(0.8);
+}
+
+.trigger-strip {
+  /* A solid red bar across the top of the reels, in front of the heaps (like the
+     machine's). The crates sit on its ends and their labels on top of them. */
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  /* Above the shade behind the crates (z-index 3), which is above the heaps. */
+  z-index: 4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* As wide as the reels' frame below it. */
+  width: 100%;
+  max-width: var(--play-w);
+  min-height: 1.1em;
+  /* The crates and their labels sit in from the edges (the shades below move in with them). */
+  padding: 0 0.375em;
+  /* The same red as the panel behind the reels (.reels-backdrop), which reaches up under
+     the bar's bottom edge, so the two read as one panel. Only the top edge is gold. */
+  background: var(--panel-red);
+  border-top: 3px solid #f5b53a;
+  border-radius: 8px 8px 0 0;
+  font-size: var(--strip-fs);
+}
+
+/*
+ * A soft dark shade behind each crate, over the gem heaps but under the bar and crates,
+ * so the gems darken around the crates like the machine's. Sized and placed in the bar's
+ * text size, like the crates: the bar is at most --play-w wide and centred.
+ */
+.features::before,
+.features::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  bottom: 0;
+  width: 9em;
+  height: 6em;
+  font-size: var(--strip-fs);
+  background: radial-gradient(ellipse 55% 60% at 50% 60%, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.55) 55%, transparent);
+  pointer-events: none;
+}
+
+.features::before {
+  left: calc((100% - min(100%, var(--play-w))) / 2 + 3.275em - 4.5em);
+}
+
+.features::after {
+  right: calc((100% - min(100%, var(--play-w))) / 2 + 3.275em - 4.5em);
+}
+
+/* ---- The banner across the top during a bonus: faces, names, then the total ---- */
+
+.bonus-hero {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  /* Shrinks along with the board and the credits when the screen is short. */
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+/* One card per extra in play, side by side, each on a backdrop in its own colour. */
+.hero-cards {
+  display: flex;
+  width: 100%;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.hero-card {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 4px;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  /* A curtain: light in the middle, darker to the edges, with soft folds. */
+  background:
+    repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.06) 0 14px, transparent 14px 34px),
+    radial-gradient(ellipse 80% 90% at 50% 40%, var(--hero-light), var(--hero-dark));
+  box-shadow: inset 0 0 0 2px var(--hero-edge);
+}
+
+.hero-green {
+  --hero-light: #2fbf71;
+  --hero-dark: #0c4a26;
+  --hero-edge: #1a8a48;
+  --face-glow: var(--glow-green);
+  --label-stroke: #2fbf71;
+  --label-dark: #0b4a26;
+}
+.hero-red {
+  --hero-light: #e0453a;
+  --hero-dark: #6e140c;
+  --hero-edge: #a8231a;
+  --face-glow: var(--glow-red);
+  --label-stroke: #e0453a;
+  --label-dark: #5e0f08;
+}
+.hero-blue {
+  --hero-light: #3a7be0;
+  --hero-dark: #0f2a6e;
+  --hero-edge: #1d4aa8;
+  --face-glow: var(--glow-blue);
+  --label-stroke: #3a7be0;
+  --label-dark: #0c2662;
+}
+
+.hero-face {
+  /* 120px tall when there's room; scales down with the card otherwise. */
+  flex: 0 1 120px;
+  min-height: 0;
+  width: 100%;
+  object-fit: contain;
+  filter: var(--white-edge) drop-shadow(0 0 8px var(--face-glow));
+}
+
+.hero-label {
+  position: relative;
+  margin-top: 2px;
+  flex-shrink: 0;
+  line-height: 1;
+  font-family: Fredoka, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+  /* White letters with a green stroke, like the machine's titles; a thin dark
+     outer stroke and the shadow underneath are drawn by ::before. */
+  color: #fff;
+  -webkit-text-stroke: calc(0.2em + 2px) var(--label-stroke);
+  paint-order: stroke fill;
+  isolation: isolate;
+}
+
+.hero-label::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: var(--label-dark);
+  -webkit-text-stroke: calc(0.2em + 4.4px) var(--label-dark);
+  text-shadow:
+    0 0.14em 0 var(--label-dark),
+    0 0.2em 0.25em rgba(0, 0, 0, 0.6);
+}
+
+/* The running total in credits, in a dark panel with a gold frame, like the machine's. */
+.hero-credits {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
+  /* 56px tall when there's room; shrinks (with its number) when there isn't. */
+  flex: 0 1 56px;
+  min-height: 0;
+  container-type: size;
+  border: 3px solid #f5b53a;
+  border-radius: 10px;
+  background: linear-gradient(#2a1450, #120828);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  line-height: 1;
+}
+
+.hero-credits strong {
+  color: #fff;
+  font-family: Fredoka, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: min(80cqh, 2.4rem);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* During the Greg Bonus the board takes the gem heaps' and bar's space too. */
+.slots.tall .features,
+.slots.tall .trigger-strip {
+  display: none;
+}
+
+.strip-end {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The crate's label: white, outlined in dark red, in the Dunkin'-style font. */
+.strip-label {
+  font-family: Fredoka, system-ui, sans-serif;
+  font-size: 1.15em;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #fff;
+  -webkit-text-stroke: 0.25em #8a1208;
+  paint-order: stroke fill;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* The label flashes with its crate: it brightens, glows and swells the same touch. */
+.strip-label.flash {
+  animation: label-flash 0.35s ease-out;
+}
+
+@keyframes label-flash {
+  30% {
+    scale: 1.03;
+    filter: brightness(1.4) drop-shadow(0 0 6px #fff3b0);
+  }
+}
+
+.coin-crate {
+  position: absolute;
+  /* Above the bar but behind its label, which runs across the crate's front. */
+  z-index: -1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -67%);
+  /* The same size on both ends (sized by the bar's text, not the label's width). */
+  width: 5.2em;
+  height: auto;
+  pointer-events: none;
+  /* A 1px white outline (four offset copies), then the glow. */
+  filter: brightness(1.1) var(--white-edge) drop-shadow(0 0 4px rgba(255, 235, 120, 1))
+    drop-shadow(0 0 10px rgba(255, 200, 60, 0.9)) drop-shadow(0 0 16px rgba(255, 160, 40, 0.6));
+}
+
+/* A crate flashes when the coins tossed from its symbols land in it (FREE GAMES for
+   Free Games, WILD for Jackpot): it and its glow blaze, and it swells a touch. */
+.coin-crate.flash {
+  animation: crate-flash 0.35s ease-out;
+}
+
+@keyframes crate-flash {
+  /* The crate and its glow both flare: the halo turns white-gold and spreads a little wider. */
+  30% {
+    scale: 1.03;
+    filter: brightness(2.3) var(--white-edge) drop-shadow(0 0 5px #fff) drop-shadow(0 0 10px #fff3b0)
+      drop-shadow(0 0 17px rgba(255, 220, 90, 1)) drop-shadow(0 0 26px rgba(255, 170, 40, 1));
+  }
+}
+
+/* Each crate sits against its end of the bar; the left one is mirrored, so the two
+   face each other. */
+.strip-end:first-child .coin-crate {
+  left: 0;
+  transform: translateY(-67%) scaleX(-1);
+}
+
+.strip-end:last-child .coin-crate {
+  left: auto;
+  right: 0;
+  transform: translateY(-67%);
+}
+
+.reels-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* The same gold edge as the banner above (3px, #f5b53a). */
+  background: #f5b53a;
+  border-radius: 14px;
+  padding: 3px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  /* Narrower than the banner by a thin strip of red panel either side. */
+  max-width: calc(var(--play-w) - 34px);
+  /* Holds the backdrop, which is drawn behind it (see .reels-backdrop). */
+  position: relative;
+  width: calc(100% - 34px);
+  margin: 0 auto;
+}
+
+/* The reels sit right under the banner. */
+.play-center:has(> .reels-frame) {
+  justify-content: flex-start;
+}
+
+/* A gold doubloon tossed from a symbol into its chest (made and moved by toss.ts, over
+   everything): a milled rim, a raised face inside a thin ring, and a shine. 22px, pulled back 2px so it stays centred where toss.ts places an 18px orb. */
+.toss-coin {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  width: 22px;
+  height: 22px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  /* Outlined in white and then black, like the thrown gems. */
+  border: 1px solid #fff;
+  background:
+    radial-gradient(circle at 36% 30%, rgba(255, 255, 255, 0.7), transparent 40%),
+    radial-gradient(circle closest-side, #f7c948 0 62%, #8a5a00 66%, #ffe27a 69%, transparent 71%),
+    repeating-conic-gradient(#e0ac2e 0 15deg, #f5c84a 15deg 30deg);
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 6px rgba(255, 210, 80, 0.9);
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Gems toss gems: the same pictures as on the reels, a little bigger than the coins (24px,
+   pulled back 3px so they stay centred where toss.ts places an 18px orb), outlined in white and then black
+   and glowing in their colour. */
+.toss-green,
+.toss-red,
+.toss-blue {
+  width: 24px;
+  height: 24px;
+  margin: -3px 0 0 -3px;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--toss-gem) center / contain no-repeat;
+  filter: var(--white-edge) drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000)
+    drop-shadow(0 -1px 0 #000) drop-shadow(0 0 4px var(--toss-glow));
+}
+.toss-green {
+  --toss-gem: url("./assets/gem-green.png");
+  --toss-glow: var(--glow-green);
+}
+.toss-red {
+  --toss-gem: url("./assets/gem-red.png");
+  --toss-glow: var(--glow-red);
+}
+.toss-blue {
+  --toss-gem: url("./assets/gem-blue.png");
+  --toss-glow: var(--glow-blue);
+}
+
+/* ---- Reels ---- */
+
+.reels {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 4px;
+  width: 100%;
+  /* Square squares when there's room. On a short screen the game caps the height
+     (--reels-fit-h) so the buttons stay on the page; the squares then get shorter. */
+  aspect-ratio: 5 / 3;
+  max-height: var(--reels-fit-h, none);
+  min-height: 90px;
+  background: #1a0608;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.reel {
+  background: linear-gradient(90deg, #3a0d12, #5a1820 50%, #3a0d12);
+  color: var(--reel-text);
+  border-radius: 6px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  position: relative;
+}
+
+.reel-cell {
+  /* Its size (cqh/cqw) sizes the royals. */
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6%;
+  font-size: var(--symbol-fs);
+  line-height: 1;
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.reel-cell.landed {
+  animation: land 0.18s ease-out;
+}
+
+.reels .reel-cell.win {
+  box-shadow:
+    inset 0 0 0 3px var(--win-glow),
+    inset 0 0 10px var(--win-glow);
+  animation: pulse 0.6s ease-in-out infinite alternate;
+}
+
+/*
+ * Greg landed: icy reels (his, the next one to stop, and the ones that land a
+ * gem).
+ */
+/* The ice is a layer under the symbols, so it can grow in. */
+.reel.greg-reel {
+  isolation: isolate;
+}
+
+.reel.greg-reel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  /* Electric blue. Once its reel has landed it settles into this darker blue; while the reel
+     is still charging up (see .lighting) it pulses instead. */
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent 40%, rgba(255, 255, 255, 0.2) 70%, transparent),
+    linear-gradient(#4a9bff, #1f55e0);
+  filter: brightness(0.85) saturate(1.1);
+}
+
+/* A spinning reel lights up a moment after it starts, growing out from its middle, and
+   pulses until it lands. */
+.reel.greg-reel.lighting::before {
+  animation: reel-light 0.35s ease-out 0.25s both;
+}
+
+/* The pulse: a brighter copy of the ice over it, fading in and out. Only its opacity
+   animates, so the filter is drawn once rather than every frame. */
+.reel.greg-reel.lighting::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.3), transparent 40%, rgba(255, 255, 255, 0.2) 70%, transparent),
+    linear-gradient(#4a9bff, #1f55e0);
+  filter: brightness(1.45) saturate(1.3);
+  pointer-events: none;
+  opacity: 0;
+  animation:
+    reel-light 0.35s ease-out 0.25s both,
+    ice-charge 0.55s ease-in-out infinite alternate;
+}
+
+/* A white flash across an icy reel the moment it stops and its square is revealed (the
+   animation starts when the reel loses its "lighting" class, i.e. when it lands). */
+.reel.greg-reel:not(.lighting)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  background: #fff;
+  pointer-events: none;
+  opacity: 0;
+  animation: reveal-flash 0.55s ease-out;
+}
+
+@keyframes reveal-flash {
+  0% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes ice-charge {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes reel-light {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* Greg's square: red, green and blue turning behind him, with a thin moving border in brighter versions of the same colours. */
+@property --spin {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.reel-cell.greg-cell {
+  position: relative;
+  /* Square corners. */
+  border-radius: 0;
+  /* Red, green and blue turning around behind Greg, in hard-edged wedges (no blending): nine, red, green, blue three times round. */
+  background: repeating-conic-gradient(from var(--spin), #ff4d4d 0deg 40deg, #3ee06a 40deg 80deg, #4a7bff 80deg 120deg);
+  /* Keeps the landing bounce too. */
+  animation:
+    land 0.18s ease-out,
+    greg-spin 4s linear infinite;
+}
+
+/* The border sits 1px outside the square, so its reel lets it show, over the reels next to it. */
+.reel:has(> .greg-cell) {
+  overflow: visible;
+  z-index: 2;
+}
+
+/* A gem's pulse (see .reel-cell.landed .gem) swells past its reel, so once the reel has
+   landed it stops clipping and sits over the reels next to it. Not until the landing bounce
+   (0.18s) is over, so the symbols don't show above the reel as they drop in. */
+.reel:has(> .reel-cell .gem) {
+  z-index: 1;
+  animation: unclip 0s 0.18s forwards;
+}
+
+@keyframes unclip {
+  to {
+    overflow: visible;
+  }
+}
+
+/* The border itself: a 1px ring of brighter red, green and blue travelling around the square
+   (the other way from the background, so it stands out against it). */
+.reel-cell.greg-cell::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 0;
+  pointer-events: none;
+  padding: 1px;
+  background: conic-gradient(from var(--spin), #ff9a9a, #9affb4, #9ab8ff, #ff9a9a);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  animation: greg-spin 4s linear infinite reverse;
+}
+
+@keyframes greg-spin {
+  to {
+    --spin: 360deg;
+  }
+}
+
+/*
+ * A spinning reel: 10 symbols, repeated once, each a third of the reel's
+ * height. Sliding down by 10 symbols (10/3 of the strip's own height) loops
+ * seamlessly, so the symbols move top to bottom like a real reel.
+ */
+.reel-strip {
+  display: flex;
+  flex-direction: column;
+  grid-row: 1 / -1;
+  height: 100%;
+  animation: spin-strip 0.35s linear infinite;
+  filter: blur(2px);
+}
+
+.reel-strip span {
+  flex: 0 0 calc(100% / 3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--symbol-fs);
+}
+
+@keyframes spin-strip {
+  from {
+    transform: translateY(-333.333%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes land {
+  from {
+    transform: translateY(-12%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0.94);
+  }
+}
+
+/* Card letters: bold, coloured, outlined in gold. */
+/* The royals, Dunkin' style: a chunky rounded font (Fredoka, loaded in index.html,
+   standing in for Dunkin' Sans) in Dunkin' orange and pink, outlined in white. */
+.letter {
+  font-family: Fredoka, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.2em;
+  text-shadow:
+    2px 0 0 #fff,
+    -2px 0 0 #fff,
+    0 2px 0 #fff,
+    0 -2px 0 #fff,
+    1.5px 1.5px 0 #fff,
+    -1.5px 1.5px 0 #fff,
+    1.5px -1.5px 0 #fff,
+    -1.5px -1.5px 0 #fff,
+    0 4px 0 #5c2d17;
+}
+.letter-A,
+.letter-Q {
+  color: #ff671f;
+}
+.letter-K,
+.letter-J {
+  color: #da1884;
+}
+
+/* On the reels, a royal is sized to its square: about two-thirds of its height,
+   closer to the pictures, which fill the square. */
+.reel-cell > .letter {
+  font-size: min(105cqh, 120cqw);
+  line-height: 1;
+}
+
+.emoji {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The Free Games symbol: just the words, stacked, in the Dunkin'-style font. */
+.word-symbol {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Dunkin' orange, outlined in white like the WILD. */
+  color: #ff671f;
+  font-family: Fredoka, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.52em;
+  line-height: 1.05;
+  text-shadow: var(--dunkin-outline-sm);
+}
+
+.word-symbol.inline {
+  font-size: 0.55em;
+  vertical-align: middle;
+}
+
+.greg-art {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  /* The face, scaled to fit its square, with a white edge and a red glow. */
+  object-fit: contain;
+  filter: var(--white-edge) drop-shadow(0 0 6px var(--glow-red));
+}
+
+.reel-cell > .greg-art {
+  /* A bit smaller, so there's room around the face inside the gold frame. */
+  scale: 0.88;
+  /* Just the white edge, no red glow. */
+  filter: var(--white-edge);
+}
+
+/* Gems: a cut-stone shape with the prize on top. */
+.gem {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Wider than tall, like the machine's gems. */
+  width: min(1.9em, 96%);
+  aspect-ratio: 1.45;
+  color: #fff;
+}
+
+/* The cut stone, drawn behind the number so the number can run across the whole gem. */
+.gem::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(20% 0, 80% 0, 100% 34%, 50% 100%, 0 34%);
+  background:
+    /* The flat top face catches the light. */
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.45) 0 34%, transparent 34%),
+    /* A bright facet down the middle. */
+    linear-gradient(100deg, transparent 38%, rgba(255, 255, 255, 0.35) 50%, transparent 62%),
+    linear-gradient(165deg, var(--gem-light), var(--gem-dark));
+}
+
+.gem-green {
+  --gem-light: #b6ffd6;
+  --gem-dark: var(--gem-green);
+  filter: drop-shadow(0 0 5px rgba(80, 255, 160, 0.7));
+}
+.gem-red {
+  --gem-light: #ffc0b8;
+  --gem-dark: var(--gem-red);
+  filter: drop-shadow(0 0 5px rgba(255, 90, 70, 0.7));
+}
+.gem-blue {
+  --gem-light: #d2e6ff;
+  --gem-dark: var(--gem-blue);
+  filter: drop-shadow(0 0 5px rgba(100, 170, 255, 0.75));
+}
+
+/* Gems on the reels twinkle: a little star glints on the top face now and then. */
+.reel-cell .gem::after {
+  content: "";
+  position: absolute;
+  top: 2%;
+  left: 24%;
+  width: 26%;
+  aspect-ratio: 1;
+  background:
+    radial-gradient(circle, #fff 0 12%, transparent 14%),
+    linear-gradient(transparent 46%, #fff 46% 54%, transparent 54%),
+    linear-gradient(90deg, transparent 46%, #fff 46% 54%, transparent 54%);
+  mask: radial-gradient(circle, #000 20%, transparent 70%);
+  opacity: 0;
+  pointer-events: none;
+  animation: twinkle 2.6s ease-in-out infinite;
+}
+
+/* Different squares glint at different times. */
+.reel-cell:nth-child(2) .gem::after {
+  animation-delay: 0.9s;
+}
+.reel-cell:nth-child(3) .gem::after {
+  animation-delay: 1.7s;
+}
+
+@keyframes twinkle {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4) rotate(0deg);
+  }
+  82% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+/* Gems pulse as their reel stops, just after its landing bounce (0.2s). Their heaps and the
+   FREE GAMES and WILD crates flash when the orbs tossed from their symbols land. */
+.reel-cell.landed .gem {
+  animation: gem-pulse 0.55s ease-out 0.2s;
+}
+
+/* The heap of the same colour flashes like the crates as the orbs from its gems land: it
+   and its glow blaze white-hot and it swells a touch, over the same 0.35s. A brighter copy
+   (everything the heap has, plus a white flare) fades in and out over it, swelling from its
+   base; only opacity and scale animate, so the long filter is drawn once rather than
+   every frame. */
+.gem-heap > .heap-flash {
+  filter: brightness(2.3) var(--heap-edge) drop-shadow(0 0 6px #fff) drop-shadow(0 0 16px rgba(255, 255, 255, 0.9));
+  transform-origin: 50% 100%;
+  opacity: 0;
+  animation: heap-flash 0.35s ease-out;
+}
+
+@keyframes heap-flash {
+  30% {
+    opacity: 1;
+    scale: 1.03;
+  }
+}
+
+@keyframes gem-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+    filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+  }
+}
+
+/* A big white number with a dark outline, across the middle of the gem. */
+.gem-prize {
+  position: relative;
+  font-size: clamp(0.8rem, calc(3.8 * var(--vw)), 1.35rem);
+  font-weight: 900;
+  line-height: 1;
+  -webkit-text-stroke: 1px #3a1200;
+  paint-order: stroke fill;
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.6);
+  margin-bottom: 10%;
+}
+
+.mini-gem {
+  width: 1em;
+  vertical-align: -0.1em;
+}
+
+/* ---- Control panel: message bar, meters, buttons ---- */
+
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* One red bar: Menu | Credit | Win | Bet | Denom. */
+.panel-bar {
+  /* Height of the black displays, and of the yellow buttons beside them. */
+  --meter-h: clamp(24px, calc(5 * var(--vw)), 32px);
+  /* The Menu and denomination buttons at the two ends are the same width. */
+  --side-btn-w: clamp(40px, calc(10.5 * var(--vw)), 52px);
+  display: grid;
+  grid-template-columns: var(--side-btn-w) 1fr 1fr 1fr var(--side-btn-w);
+  /* Holds "FEATURE COMPLETE" in its top-right corner (see .meter-status-end). */
+  position: relative;
+  align-items: end;
+  gap: clamp(4px, calc(1.2 * var(--vw)), 10px);
+  /* The bottom always leaves room for "BONUS REELS IN PLAY" (see .reels-note), so the bar
+     is the same height whether or not it shows. */
+  padding: 6px clamp(6px, calc(1.5 * var(--vw)), 12px) calc(8px + var(--note-fs) + 2px);
+  border-radius: 10px;
+  background: linear-gradient(#d8341c, #a51a0c 55%, #7a0e06);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.yellow-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  min-height: clamp(44px, calc(10 * var(--vw)), 58px);
+  color: #3a2200;
+  font-weight: 900;
+  text-transform: uppercase;
+  background: linear-gradient(#fff07a, #f5c516 55%, #d99a00);
+  border: 2px solid #8a5a00;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    0 2px 0 #5a3a00;
+  line-height: 1.05;
+}
+
+.yellow-btn:disabled {
+  opacity: 0.55;
+}
+
+/* The buttons are exactly as tall as the black displays, lined up along the bottom. */
+.panel-bar .yellow-btn {
+  height: var(--meter-h);
+  min-height: 0;
+  padding: 0 clamp(8px, calc(2 * var(--vw)), 14px);
+}
+
+.menu-btn {
+  font-size: clamp(0.6rem, calc(2.1 * var(--vw)), 0.75rem);
+}
+
+.panel-bar .menu-btn,
+.panel-bar .denom-btn {
+  width: var(--side-btn-w);
+  padding: 0;
+}
+
+.panel-bar .denom-btn {
+  position: relative;
+}
+
+.denom-value {
+  font-size: clamp(0.6rem, calc(2.1 * var(--vw)), 0.75rem);
+}
+
+/* "BONUS REELS IN PLAY" sits just under the denomination button, in the bar's bottom edge. */
+
+.reels-note {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  font-size: var(--note-fs);
+  font-weight: 800;
+  color: #ffe680;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 #3a0500;
+}
+
+.feature-intro {
+  color: var(--win-glow);
+  animation: pulse 0.5s ease-in-out infinite alternate;
+  display: inline-block;
+}
+
+/* Each meter: a white label above a black display with big white numbers. */
+.meter-box {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  line-height: 1.1;
+}
+
+.meter-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: var(--meter-h);
+  padding: 0 6px;
+  background: linear-gradient(#1a1a1a, #050505);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  /* Lets the number size itself to the display's width (see .meter-value). */
+  container-type: inline-size;
+}
+
+.meter-label {
+  text-align: center;
+  font-size: clamp(0.6rem, calc(2.2 * var(--vw)), 0.8rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  margin-bottom: 2px;
+  color: #fff;
+  text-shadow: 0 1px 0 #4a0500;
+}
+
+/* The status line can run wider than the WIN box, over the space above CREDIT and BET. */
+.meter-status {
+  display: flex;
+  justify-content: center;
+  contain: inline-size;
+  min-height: 1.2em;
+  font-size: clamp(0.55rem, calc(2 * var(--vw)), 0.72rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #ffe680;
+  white-space: nowrap;
+}
+
+/* "FEATURE COMPLETE" sits as far right as it can go: the bar's top-right corner (inside its
+   padding), level with the win line over WIN. */
+.meter-status-end {
+  position: absolute;
+  top: 6px;
+  right: clamp(6px, calc(1.5 * var(--vw)), 12px);
+  contain: none;
+}
+
+.meter-value {
+  display: block;
+  min-height: 1em;
+  max-width: 100%;
+  /* Shrinks with the display's width so long amounts like $1,043.30 always fit. */
+  font-size: min(1.35rem, 14cqi);
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* The meters are buttons: touching one switches all three between credits and currency. */
+.meter-toggle {
+  width: 100%;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.meter-box.big .meter-display {
+  color: var(--win-glow);
+  box-shadow:
+    0 0 0 2px var(--win-glow),
+    0 0 14px var(--win-glow);
+  animation: pulse 0.5s ease-in-out infinite alternate;
+}
+
+/* Bet buttons, with Spin on the right. */
+.button-deck {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(4px, calc(1.2 * var(--vw)), 8px);
+}
+
+.bet-btn {
+  width: clamp(44px, calc(12 * var(--vw)), 76px);
+  min-height: 0;
+  padding: 3px 2px;
+}
+
+.bet-btn-label {
+  font-size: clamp(0.44rem, calc(1.75 * var(--vw)), 0.62rem);
+}
+
+.bet-btn-credits {
+  font-size: clamp(0.7rem, calc(3.2 * var(--vw)), 1.1rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.bet-btn.selected {
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 14px #fff;
+}
+
+/* The reels (or bonus board / jackpot game) take the height the rest leaves. */
+.play-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, calc(1.5 * var(--vw)), 10px);
+  flex: 1;
+  min-height: 0;
+}
+
+/* In the Greg Bonus the play row shrinks to fit, like the board in it (see .bonus-screen .bonus-stage). */
+.bonus-screen .play-row {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* On the reels, the reels keep their own height, and any height left over on a tall screen
+   goes inside the gem-heap row, between each name and its heap (faces stay under the plaques). */
+.cabinet:has(.reels-frame) .play-row {
+  flex: 0 0 auto;
+}
+
+.cabinet:has(.reels-frame) .cabinet-top {
+  flex: 1;
+}
+
+.cabinet:has(.reels-frame) .features {
+  flex: 1 1 auto;
+}
+
+.play-center {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Its width sizes the red panel behind the reels (see .reels-backdrop). */
+  container-type: inline-size;
+  /* Keeps the red panel behind the reels (z-index -1) in front of the cabinet. */
+  isolation: isolate;
+  /* Holds the Free Games splash. */
+  position: relative;
+}
+
+.spin-big {
+  width: clamp(90px, calc(24 * var(--vw)), 150px);
+  min-height: clamp(44px, calc(10 * var(--vw)), 58px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  color: #fff;
+  background: linear-gradient(#5fd35a, #2a9a2a 60%, #1f7a1f);
+  border: 3px solid #b8f5a0;
+  border-radius: 10px;
+  box-shadow:
+    0 3px 0 #145214,
+    0 0 12px rgba(120, 255, 120, 0.35);
+  text-shadow: 0 2px 0 #145214;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.spin-big:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #145214;
+}
+
+.spin-label {
+  font-size: clamp(0.75rem, calc(3.4 * var(--vw)), 1.3rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1.05;
+}
+
+/* ---- Denomination pop-up ---- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Both modals sit fixed in the middle of the screen, over everything. */
+.denom-modal,
+.menu-modal {
+  position: fixed;
+  z-index: 21;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.denom-modal {
+  width: min(560px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  color: #fff;
+  background: linear-gradient(#a51a0c, #5a0a04);
+  border: 3px solid #f5c516;
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* All six denominations on one line, as square buttons. */
+.denom-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: clamp(4px, calc(1.5 * var(--vw)), 10px);
+  width: 100%;
+}
+
+.denom-choice {
+  aspect-ratio: 1;
+  min-height: 0;
+  padding: 0;
+}
+
+.denom-choice .denom-value {
+  font-size: clamp(0.9rem, calc(4 * var(--vw)), 1.5rem);
+}
+
+.denom-choice.selected {
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 14px #fff;
+}
+
+/* ---- Greg Bonus ---- */
+
+.bonus {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* The board, with the diamond slots on its right, on black. Takes all the height the header leaves. */
+.bonus-main {
+  background: #000;
+  border-radius: 10px;
+  padding: 6px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  /* Holds the diamond flying from its square to the column (.diamond-flight). */
+  position: relative;
+}
+
+/* The board grows as big as fits, keeping its squares square. */
+.bonus-board-fit {
+  flex: 1;
+  min-width: 0;
+  /* Wants the full width at the board's shape (its height follows from that), and shrinks
+     to whatever height there is, keeping its squares square. */
+  aspect-ratio: var(--cols, 5) / var(--rows, 5);
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bonus-board {
+  display: grid;
+  /* Same as GAP in BonusBoard. */
+  gap: 4px;
+  --board-w: min(100cqw, 100cqh * var(--cols, 5) / var(--rows, 5));
+  width: var(--board-w);
+  /* One square plus the gap, across or down (the squares are square), for placing Greg. */
+  --greg-step: calc((var(--board-w) + 4px) / var(--cols, 5));
+  position: relative;
+  /* Its own layer stack: squares (1), then Greg (2), then coins and diamonds (3). */
+  isolation: isolate;
+}
+
+.bonus-cell {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  /* Black, with a slight edge, like the machine's. */
+  background: #000;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  /* Icon and prize size themselves to the square (cqi = % of its width), so they always fit. */
+  container-type: inline-size;
+  line-height: 1.1;
+  text-align: center;
+  /* Squares sit under Greg; coins and diamonds sit on top of him (see below). */
+  position: relative;
+  z-index: 1;
+  animation: land 0.2s ease-out;
+}
+
+/* Coins and diamonds are drawn over Greg, like the machine's. */
+.bonus-cell.coin,
+.bonus-cell.diamond {
+  z-index: 3;
+}
+
+/* A normal symbol on an empty board square, dark grey (the machine's are dark purple). */
+.bonus-tile {
+  font-size: 72cqi;
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+.bonus-icon {
+  font-size: 45cqi;
+}
+
+.bonus-prize {
+  font-size: 25cqi;
+  font-weight: 700;
+}
+
+/* One prize: a big coin or diamond with its value written across the middle of it. */
+.bonus-item {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bonus-item > .bonus-icon {
+  font-size: 88cqi;
+  line-height: 1;
+}
+
+.bonus-item > .bonus-prize {
+  /* Centred by flex, not a transform, so the blast animation's scaling doesn't move it. */
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(0, 0, 0, 0.7);
+}
+
+/* A Mo' Symbols double: one picture of two diamonds or coins on a diagonal, filling the square,
+   with each value written over its half. */
+.bonus-item.bonus-double {
+  display: block;
+  /* Square, so the labels line up with the picture's coins or diamonds. */
+  flex: 0 0 auto;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 1;
+}
+
+.double-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bonus-item.bonus-double .double-label {
+  position: absolute;
+  /* A box centred on its coin or diamond, with the value centred in it. */
+  width: 62%;
+  height: 24%;
+  right: auto;
+  bottom: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 16cqi;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Centred on the top-left coin or diamond (centre 32%, 32%), then the bottom-right one (68%, 68%). */
+.bonus-item.bonus-double .double-label.double-0 {
+  top: 20%;
+  left: 1%;
+}
+
+.bonus-item.bonus-double .double-label.double-1 {
+  top: 56%;
+  left: 37%;
+}
+
+/* A spinning square: a strip of coins, diamonds and blanks scrolling down, looping every half strip. */
+.roll-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  animation: roll-down 0.53s linear infinite;
+}
+
+.roll-item {
+  flex: 0 0 100cqi;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 68cqi;
+  filter: blur(1px);
+}
+
+@keyframes roll-down {
+  from {
+    transform: translateY(-50%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* A coin outside Greg isn't collected: it shows in grey, dimmed (the machine's go dim purple).
+   It stays under Greg if he later moves over it (named with its kind, so it outranks the
+   z-index: 3 above without relying on coming later). */
+.bonus-cell.coin.missed,
+.bonus-cell.diamond.missed {
+  z-index: 1;
+  filter: grayscale(1) brightness(0.55);
+}
+
+.bonus-cell.collected {
+  background: rgba(255, 216, 77, 0.25);
+}
+
+.bonus-tag {
+  font-size: 18cqi;
+  color: var(--tier-minor);
+  font-weight: 700;
+}
+
+/* A coin landing inside Greg is blasted away: it flashes, bursts and disappears. */
+.bonus-cell.coin.collected {
+  animation:
+    land 0.2s ease-out,
+    blast-square 0.85s ease-in forwards,
+    under-greg 0s 0.85s forwards;
+}
+
+/* Once its blast is over, the empty square drops back under Greg like the others, so its edge
+   doesn't show through more brightly than theirs. */
+@keyframes under-greg {
+  to {
+    z-index: 1;
+  }
+}
+
+/* The icons, values and tags (each prize's icon and value sit in a .bonus-item). */
+.bonus-cell.coin.collected .bonus-item > *,
+.bonus-cell.coin.collected > .bonus-tag {
+  animation: blast 0.6s ease-in 0.25s forwards;
+}
+
+/*
+ * Once Greg reaches a diamond it flashes and bursts (0.6s). Then the one
+ * on the board fades back in, dimmed like a missed coin and under Greg, as a copy
+ * flies to the column.
+ */
+.bonus-cell.diamond.claimed {
+  animation:
+    blast-square 0.6s ease-in,
+    claimed 0s 0.6s forwards;
+}
+
+.bonus-cell.diamond.claimed .bonus-item > *,
+.bonus-cell.diamond.claimed > .bonus-tag {
+  animation: burst-dim 0.9s ease-in;
+}
+
+/* The blast (first 0.6s), then the diamond fades back in (0.3s). */
+@keyframes burst-dim {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.35);
+    filter: brightness(1.8);
+  }
+  66.6% {
+    opacity: 0;
+    transform: scale(1.9);
+    filter: brightness(2.5);
+  }
+  66.7% {
+    opacity: 0;
+    transform: scale(1);
+    filter: none;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes claimed {
+  to {
+    z-index: 1;
+    filter: grayscale(1) brightness(0.55);
+  }
+}
+
+@keyframes blast {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.35);
+    filter: brightness(1.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+    filter: brightness(2.5);
+  }
+}
+
+@keyframes blast-square {
+  0%,
+  30% {
+    background: rgba(255, 216, 77, 0.45);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+.bonus-cell.diamond.collected {
+  background: rgba(150, 210, 255, 0.3);
+}
+
+/* A boosted value is written in gold instead of white. */
+.bonus-prize.boosted {
+  color: #ffc23c;
+}
+
+/* "+1 SPIN" as a prize: in green, a little smaller than a number (it is longer). */
+.bonus-prize.spin-prize {
+  color: #b6ff6a;
+  font-size: 17cqi;
+}
+
+.greg-area {
+  border: 3px solid var(--win-glow);
+  border-radius: 10px;
+  /* A blue backdrop behind Greg, a little see-through (the swirl of blues turns over it, see ::before). */
+  background: radial-gradient(ellipse at 50% 35%, rgba(70, 140, 255, 0.5), rgba(14, 34, 130, 0.55));
+  overflow: hidden;
+  box-shadow:
+    0 0 16px rgba(255, 216, 77, 0.6),
+    inset 0 0 10px rgba(255, 216, 77, 0.35);
+  /* Positioned over the board by BonusBoard; slides between squares. Above the squares,
+     below coins and diamonds. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 2;
+  /* He walks one square at a time (BonusBoard), across first, then up or down. */
+  transition:
+    translate 0.2s ease,
+    width 0.3s ease,
+    height 0.3s ease;
+}
+
+.greg-area::before {
+  content: "";
+  position: absolute;
+  /* Bigger than the box, so its corners never turn into view. */
+  inset: -60%;
+  pointer-events: none;
+  /* Swirls of light and deep blue, a little see-through, turning around Greg. */
+  background: conic-gradient(
+    from 0deg,
+    rgba(90, 160, 255, 0.5),
+    rgba(14, 34, 130, 0.5),
+    rgba(70, 140, 255, 0.5),
+    rgba(14, 34, 130, 0.5),
+    rgba(90, 160, 255, 0.5)
+  );
+  animation: sky-turn 30s linear infinite;
+}
+
+@keyframes sky-turn {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.greg-area.grew {
+  animation: pulse 0.4s ease-in-out 3 alternate;
+}
+
+/* Greg fills his box, solid, over the squares under him. */
+.greg-face {
+  position: absolute;
+  inset: 4%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.greg-face .greg-art {
+  width: 100%;
+  height: 100%;
+}
+
+/* The slots shrink to fit the board's height, however many there are (`--n`). */
+.diamond-slots {
+  flex: 0 0 auto;
+  width: clamp(24px, calc(6 * var(--vw)), 40px);
+  container-type: size;
+  display: flex;
+  /* Fills from the bottom up. */
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.diamond-slot {
+  width: min(100cqw, (100cqh - (var(--n) - 1) * 4px) / var(--n));
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.8rem, calc(3 * var(--vw)), 1.3rem);
+  border: 2px dashed rgba(156, 195, 255, 0.4);
+  border-radius: 6px;
+}
+
+.diamond-slot:not(.full) {
+  color: transparent;
+  text-shadow: none;
+}
+
+/* The size ladder, with the spins-left box under it. */
+.ladder-col {
+  flex: 0 0 auto;
+  width: clamp(44px, calc(11 * var(--vw)), 64px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* A big number on the left with "SPINS / LEFT" beside it. */
+.spins-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 2px;
+  border: 2px solid #f5b53a;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  line-height: 1.05;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.spins-left strong {
+  font-size: clamp(1rem, calc(4 * var(--vw)), 1.6rem);
+  color: var(--win-glow);
+  font-variant-numeric: tabular-nums;
+}
+
+.spins-left span {
+  font-size: clamp(0.45rem, calc(1.7 * var(--vw)), 0.65rem);
+  font-weight: 800;
+  color: #fff;
+  text-align: left;
+}
+
+.size-ladder {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2px;
+  font-size: clamp(0.55rem, calc(2.2 * var(--vw)), 0.8rem);
+  font-weight: 800;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.size-ladder li {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  border-radius: 6px;
+}
+
+.size-ladder li.here {
+  color: var(--win-glow);
+  background: rgba(255, 216, 77, 0.15);
+}
+
+.ladder-greg {
+  width: 70%;
+  max-height: 60%;
+  aspect-ratio: 1;
+}
+
+/* Sizes already passed stay lit, with a smaller Greg than the current size's. */
+.size-ladder li.passed {
+  color: #ffe9a8;
+}
+
+.size-ladder li.passed .ladder-greg {
+  width: 45%;
+  max-height: 40%;
+}
+
+/* Once Greg fills the board: "ALL [coin] PAYS" in place of the diamond column and ladder. */
+.ladder-col.all-pays-col {
+  width: clamp(56px, calc(14 * var(--vw)), 84px);
+}
+
+.all-pays {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 2px solid #f5b53a;
+  border-radius: 8px;
+  background: linear-gradient(#d0281a, #9c140c);
+  color: #ffd27a;
+  font-weight: 900;
+  font-size: clamp(0.8rem, calc(3 * var(--vw)), 1.2rem);
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 #5a0a00;
+}
+
+.diamond-slot.full {
+  border-style: solid;
+  border-color: #9cc3ff;
+  background: rgba(150, 210, 255, 0.25);
+}
+
+/*
+ * A claimed diamond flies from its square to the column: it bursts when Greg
+ * reaches it (0.6s), then flies (0.5s) and fills its slot as it lands.
+ */
+/* First, the claimed diamond's value bursts out of its square and flies up into the banner
+   total (0.6s, while the diamond bursts on its square); the total takes it in as it lands
+   (BonusBoard waits for this animation's end, so it isn't in the reduced-motion list). */
+.value-flight {
+  position: absolute;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  color: #fff;
+  font-family: Fredoka, system-ui, sans-serif;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.6),
+    0 0 10px var(--win-glow);
+  animation: value-fly 0.6s ease-in both;
+}
+
+@keyframes value-fly {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  /* The burst: it swells on the square before it lifts off. */
+  25% {
+    transform: translate(0, 0) scale(1.5);
+  }
+  85% {
+    opacity: 1;
+  }
+  /* Gone as it lands, so it doesn't sit over the banner's own number. */
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(var(--scale));
+    opacity: 0;
+  }
+}
+
+/* A diamond's "+1 SPIN" flies to the SPINS LEFT number at the same time, in the green of
+   a spin prize. */
+.value-flight.spins-flight {
+  color: #b6ff6a;
+}
+
+/* A collected coin's value and "+1 SPIN" lift off as the coin blasts (see
+   .bonus-cell.coin.collected). Until then each copy sits over the coin's own label. */
+.value-flight.coin-flight {
+  animation-delay: 0.25s;
+  /* The board's own font, so the copy matches the label it covers. */
+  font-family: inherit;
+}
+
+/* The banner total and SPINS LEFT pop as a value or spins land in them (a new number
+   remounts them). */
+.hero-credits strong,
+.spins-left strong {
+  display: inline-block;
+  animation: bank-pop 0.3s ease-out;
+}
+
+@keyframes bank-pop {
+  from {
+    transform: scale(1.25);
+    filter: brightness(1.6);
+  }
+}
+
+/* Then a copy of the diamond flies to the column. */
+.diamond-flight {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+  animation: diamond-fly 0.5s ease-in-out 0.6s both;
+}
+
+.diamond-flight svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes diamond-fly {
+  from {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(var(--scale));
+    opacity: 0;
+  }
+}
+
+/* A slot fills as its diamond lands, then glows for a moment. When it completes a
+   set, Greg grows once the glow is over. */
+.diamond-slot.arriving {
+  animation:
+    slot-fill 0.2s ease-out 1.05s both,
+    slot-hold 0.5s 1.25s;
+}
+
+@keyframes slot-hold {
+  50% {
+    box-shadow: 0 0 12px #9cc3ff;
+  }
+}
+
+@keyframes slot-fill {
+  from {
+    color: transparent;
+    border-style: dashed;
+    border-color: rgba(156, 195, 255, 0.4);
+    background: none;
+  }
+}
+
+/* The cup in "Touch [cup] to reveal". */
+.status-cup .cup-art {
+  height: 1.3em;
+  width: auto;
+  vertical-align: middle;
+}
+
+/* Jackpot name colours on the plaques. */
+.tier-mini {
+  color: var(--tier-mini);
+}
+.tier-minor {
+  color: var(--tier-minor);
+}
+.tier-maxi {
+  color: var(--tier-maxi);
+}
+.tier-major {
+  color: var(--tier-major);
+}
+.tier-grand {
+  color: var(--tier-grand);
+}
+
+/* The three splash overlays (jackpot awarded, free games, Greg Bonus): each covers its area,
+   centred, in the Dunkin'-style font with a thin white outline that scales with the text
+   (drawn under the fill, so half of it shows). */
+.jackpot-award,
+.free-splash,
+.bonus-splash {
+  position: absolute;
+  inset: 0;
+  font-family: Fredoka, system-ui, sans-serif;
+  -webkit-text-stroke: 0.08em #fff;
+  paint-order: stroke fill;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- Jackpot pick game: a banner over a 5 × 3 grid of coffee cups on purple, in the reels' place ---- */
+
+/* Inside the same frame as the reels, and the same size and shape as them (see .reels), so
+   the rest of the machine stays where it is. */
+.pick {
+  width: 100%;
+  aspect-ratio: 5 / 3;
+  max-height: var(--reels-fit-h, none);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  background: radial-gradient(ellipse at center, #8a2be2, #5a1aa8 70%, #45138a);
+  /* Holds the "Jackpot awarded" overlay. */
+  position: relative;
+}
+
+.pick-banner {
+  /* The Dunkin'-style font, styled like the WILD: Dunkin' orange with a white
+     outline and a brown drop shadow. */
+  font-family: Fredoka, system-ui, sans-serif;
+  align-self: center;
+  /* Above the "Jackpot awarded" overlay (z-index 5), so "You've won!" isn't dimmed by it. */
+  position: relative;
+  z-index: 6;
+  color: #ff671f;
+  font-weight: 700;
+  font-size: clamp(0.95rem, calc(4.5 * var(--vw)), 1.7rem);
+  text-transform: uppercase;
+  text-align: center;
+  text-shadow: var(--dunkin-outline-sm);
+}
+
+.pick-three {
+  /* Dunkin' pink. */
+  color: #e11383;
+}
+
+.pick-fit {
+  flex: 1;
+  min-height: 0;
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 5 × 3 squares, 4:3, as big as fits: width w per square, so 3 rows are 3 × ¾w + 2 gaps high. */
+.pick-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  width: min(100cqw, (100cqh - 16px) * 20 / 9 + 32px);
+}
+
+.pick-cup {
+  aspect-ratio: 4 / 3;
+  min-width: 0;
+  padding: 6%;
+  border: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The name sizes itself to the square. */
+  container-type: inline-size;
+}
+
+.pick-cup .cup-art {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.pick-cup:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+/* A picked cup shows only the jackpot name, in its colour with a dark outline.
+   The name sizes to its square (cqi works only inside the square, not on it). */
+.pick-name {
+  font-size: 26cqi;
+  white-space: nowrap;
+}
+
+.pick-cup.revealed {
+  font-weight: 900;
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+}
+
+/* Jackpot name colours, the same as the jackpot plaques (--tier-*): in the jackpot game,
+   and on gems, coins and diamonds (.jp-*). */
+.pick-mini,
+.jp-mini {
+  color: var(--tier-mini);
+}
+.pick-minor,
+.jp-minor {
+  color: var(--tier-minor);
+}
+.pick-maxi,
+.jp-maxi {
+  color: var(--tier-maxi);
+}
+.pick-major,
+.jp-major {
+  color: var(--tier-major);
+}
+.pick-grand,
+.jp-grand {
+  color: var(--tier-grand);
+}
+
+/* Every jackpot name in the Dunkin'-style font, keeping its colour. */
+.pick-name,
+.award-name,
+.jp-mini,
+.jp-minor,
+.jp-maxi,
+.jp-major,
+.jp-grand {
+  font-family: Fredoka, system-ui, sans-serif;
+}
+
+/* The names in the jackpot game are outlined in black. The stroke is drawn under the
+   fill, so only its outer half shows. Other jackpot names have no outline. */
+.pick-name {
+  -webkit-text-stroke: 0.14em #000;
+  paint-order: stroke fill;
+}
+
+/* Once won, every revealed name but the matched three dims to dark blue (no outline),
+   and the unpicked cups go dark. */
+.pick-cup.dim {
+  color: #2c3f9e;
+  text-shadow: none;
+}
+
+.pick-cup.dim .pick-name {
+  -webkit-text-stroke: 0;
+}
+
+.pick-cup.dim .cup-art {
+  filter: grayscale(0.6) brightness(0.4);
+}
+
+/* The "Jackpot awarded" overlay once the pick game is won: the big name over a red scroll. */
+.jackpot-award {
+  z-index: 5;
+  gap: 4px;
+  border-radius: 12px;
+  background: rgba(20, 6, 40, 0.8);
+  animation: land 0.3s ease-out;
+  /* Sizes below are % of this box's height (cqh), so everything fits and stays centred. */
+  container-type: size;
+}
+
+.award-name {
+  /* No outline (the overlay's thin white one would otherwise carry over). */
+  -webkit-text-stroke: 0;
+  font-size: min(26cqh, 18cqw);
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow:
+    0 3px 0 #7a0a00,
+    0 0 12px rgba(0, 0, 0, 0.6);
+}
+
+.award-scroll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(90%, 420px);
+  padding: 2cqh 16px;
+  border: 4px solid #f5b53a;
+  border-radius: 12px;
+  background: linear-gradient(#d0281a, #9c140c);
+  box-shadow:
+    inset 0 0 0 2px #ffd27a,
+    0 6px 16px rgba(0, 0, 0, 0.6);
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.award-label {
+  /* No outline: it blurs text this small. */
+  -webkit-text-stroke: 0;
+  /* Light enough to read on the lighter top of the red scroll. */
+  color: #fff0d0;
+  font-weight: 700;
+  font-size: min(8cqh, 5cqw);
+  text-shadow: 0 2px 0 #5a0a00;
+}
+
+.award-amount {
+  color: #fff;
+  font-weight: 700;
+  font-size: min(22cqh, 15cqw);
+  text-shadow: 0 3px 0 #5a0a00;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Free Games: purple reels, and "n SPINS LEFT" in the middle of the banner bar ---- */
+
+.reels-frame.free .reels {
+  background: #1c0838;
+}
+
+.reels-frame.free .reel {
+  background: linear-gradient(90deg, #3a1470, #5a24a8 50%, #3a1470);
+}
+
+/* Where the crest is: centred on the bar, sized in the bar's text size, so the reels keep their height. */
+.free-left {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.05em 0.6em;
+  border: 2px solid #f5b53a;
+  border-radius: 8px;
+  background: linear-gradient(#6a1fb8, #4a1290);
+  line-height: 1.05;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.free-left strong {
+  font-size: 1.4em;
+  color: var(--win-glow);
+  font-variant-numeric: tabular-nums;
+}
+
+.free-left span {
+  font-size: 0.5em;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* ---- Free Games splash: "6 / FREE GAMES AWARDED" over the reels until Spin ---- */
+
+.free-splash {
+  z-index: 6;
+  /* Sizes below are % of this box's height (cqh), so the sign always fits. */
+  container-type: size;
+  animation: land 0.3s ease-out;
+  pointer-events: none;
+  /* Dims the reels behind it a little. */
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 14px;
+}
+
+/* The Dunkin' pink medallion with a white frame, holding the number of games. */
+.free-medal {
+  /* The circle's size includes its frame, so padding (below) can't stretch it. */
+  width: calc(min(42cqh, 30cqw) + 2 * min(2.2cqh, 1.6cqw));
+  aspect-ratio: 1;
+  margin-bottom: -6cqh;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: min(2.2cqh, 1.6cqw) solid #fff;
+  box-shadow:
+    inset 0 0 0 3px #ff671f,
+    0 6px 16px rgba(0, 0, 0, 0.6);
+  background: radial-gradient(circle at 50% 40%, #f0409c, #b80f6c 70%);
+  color: #ff671f;
+  font-weight: 700;
+  font-size: min(30cqh, 22cqw);
+  line-height: 1;
+  /* Lifts the number by half its shadow's depth, so number and shadow sit centred together. */
+  padding-bottom: 0.1em;
+  /* A white outline and brown shadow, like the WILD. */
+  text-shadow: var(--dunkin-outline);
+}
+
+/* The Dunkin' orange scroll with a white border under it. */
+.free-scroll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(92%, 520px);
+  padding: 7cqh 16px 2.5cqh;
+  border: 4px solid #fff;
+  border-radius: 14px;
+  background: linear-gradient(#ff7f3a, #e8530c);
+  box-shadow:
+    inset 0 0 0 2px #da1884,
+    0 6px 16px rgba(0, 0, 0, 0.6);
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.05;
+}
+
+.free-title {
+  color: #da1884;
+  font-weight: 700;
+  font-size: min(13cqh, 9cqw);
+  /* A white outline and brown shadow, like the WILD. */
+  text-shadow: var(--dunkin-outline);
+}
+
+.free-press {
+  /* No outline: it blurs text this small. */
+  -webkit-text-stroke: 0;
+  margin-top: 1.5cqh;
+  /* Dark on the orange scroll: light text can't be read on it at this size. */
+  color: #2a0e04;
+  font-weight: 800;
+  font-size: min(5cqh, 3.4cqw);
+}
+
+/* ---- Help screen (MENU): pages flipped with arrows, like a machine's help ---- */
+
+.menu-modal {
+  width: min(600px, calc(100vw - 24px));
+  height: min(560px, calc(100dvh - 24px));
+  display: flex;
+  color: var(--cabinet-text);
+  background: linear-gradient(#2b2b2b, #1c1714 60%, #3a1a0c);
+  border: 4px solid #c2410c;
+  outline: 3px solid var(--gold);
+  outline-offset: -9px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+}
+
+.help-screen {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 18px 18px 14px;
+  gap: 10px;
+}
+
+.help-title {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.1rem, calc(4.5 * var(--vw)), 1.5rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--win-glow);
+  text-shadow: 0 2px 0 #7a4a00;
+}
+
+.help-body {
+  flex: 1;
+  overflow-y: auto;
+  /* Room for the gems' glow at the sides, so scrolling doesn't clip it (the margin keeps
+     the text where it was). */
+  padding-inline: 10px;
+  margin-inline: -10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+/* The last page: Greg on top, then Scott, Ben and Mike in a row. */
+.help-crew {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.help-crew-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.help-person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The same style as the names on the main screen (white, outlined in a colour, with a
+   shadow), outlined in Dunkin' orange. */
+.help-name {
+  font-family: Fredoka, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #fff;
+  -webkit-text-stroke: calc(0.3em - 2px) #ff671f;
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* Three names share the row, so these are smaller. */
+.help-name.small {
+  font-size: 1.1rem;
+}
+
+.help-face {
+  /* The same size as the faces on the main screen. */
+  height: 80px;
+  width: auto;
+  flex-shrink: 0;
+  object-fit: contain;
+  /* White edge and a glow, like the other faces. */
+  filter: var(--white-edge) drop-shadow(0 0 10px rgba(255, 216, 77, 0.7));
+}
+
+.help-body p {
+  margin: 0;
+}
+
+.help-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.help-note {
+  text-align: center;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.pay-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+.pay-table th,
+.pay-table td {
+  padding: 3px 8px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pay-table thead th {
+  color: var(--win-glow);
+  font-weight: 900;
+}
+
+.pay-table tbody th {
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pay-table td {
+  font-weight: 800;
+}
+
+.pay-sym {
+  display: inline-block;
+  min-width: 1.4em;
+  font-size: 1.3rem;
+  font-family: Georgia, serif;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* In a help row the symbol takes all the room it needs (the FREE GAMES words are wider than
+   the symbol's usual box), so the text beside it isn't pushed up against it. */
+.help-row > .pay-sym {
+  flex: none;
+  min-width: max-content;
+  margin-right: 4px;
+}
+
+.pay-name {
+  margin-left: 6px;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.grow-table {
+  width: auto;
+  align-self: center;
+}
+
+.help-gems {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.help-jackpots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  /* Rows far enough apart, and room on top, for the names on the plaques' top borders. */
+  gap: 14px 6px;
+  padding-top: 0.5rem;
+}
+
+.help-rules {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.help-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.help-arrow {
+  min-height: 0;
+  width: 48px;
+  height: 40px;
+  padding: 0;
+  font-size: 1.1rem;
+}
+
+.help-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.help-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.help-dots span.on {
+  background: var(--win-glow);
+}
+
+.help-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.help-actions .link {
+  color: rgba(243, 236, 255, 0.7);
+  font-size: 0.8rem;
+}
+
+.help-return {
+  min-height: 0;
+  padding: 8px 22px;
+  margin-left: auto;
+}
+
+.inline-greg {
+  display: inline-block;
+  flex: 0 0 auto;
+  /* In a line of text, centred on it like the other inline symbols. */
+  vertical-align: middle;
+}
+
+/* Keyboard focus: a white ring just outside the button, so it shows whatever the button's colour. */
+.slots button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Not .diamond-slot.arriving: BonusBoard waits for its animationend before Greg grows. */
+@media (prefers-reduced-motion: reduce) {
+  .reel-strip,
+  .reel.greg-reel.lighting::before,
+  .reel.greg-reel.lighting::after,
+  .reel.greg-reel:not(.lighting)::after,
+  .reels .reel-cell.win,
+  .reel-cell.greg-cell,
+  .reel-cell.greg-cell::before,
+  .reel-cell .gem::after,
+  .feature.on,
+  .feature-intro,
+  .meter-box.big .meter-display,
+  .strip-label.flash,
+  .coin-crate.flash,
+  .gem-heap > .heap-flash,
+  .confetti,
+  .greg-area::before,
+  .greg-area.grew {
+    animation: none;
+  }
+}
+
+/* ---- Greg Bonus splash (before the first bonus spin) ---- */
+
+.play-area {
+  display: contents;
+}
+
+.bonus-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Nothing is ever cut off: the banner above shrinks first, then the board, down to what the
+   screen has (the play row's share is with the other .play-row rules). */
+.bonus-screen .bonus-stage,
+.bonus-screen .bonus,
+.bonus-screen .bonus-main {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* The bonus banner and board together; the splash covers both. */
+.bonus-screen {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bonus-splash {
+  z-index: 5;
+  gap: var(--splash-gap);
+  padding: 16px;
+  background: rgba(10, 4, 20, 0.8);
+  text-align: center;
+  animation: splash-in 0.35s ease-out;
+}
+
+@keyframes splash-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+.splash-greg {
+  position: relative;
+  width: clamp(90px, calc(26 * var(--vw)), 170px);
+  aspect-ratio: 1;
+}
+
+/* Each extra's face, on its banner. */
+.splash-face {
+  height: clamp(2.4rem, calc(9 * var(--vw)), 3.6rem);
+  width: auto;
+  flex-shrink: 0;
+  /* White edge and a glow in the extra's colour, like the faces in the banner. */
+  filter: var(--white-edge) drop-shadow(0 0 8px var(--face-glow));
+}
+.face-green {
+  --face-glow: var(--glow-green);
+}
+.face-red {
+  --face-glow: var(--glow-red);
+}
+.face-blue {
+  --face-glow: var(--glow-blue);
+}
+
+.confetti {
+  position: absolute;
+  top: -10%;
+  width: 7px;
+  height: 12px;
+  border-radius: 1px;
+  background: #ff5fa8;
+  animation: confetti-fall 1.4s linear infinite;
+}
+.confetti:nth-child(3n) {
+  background: #4fe08a;
+}
+.confetti:nth-child(3n + 1) {
+  background: #6aa4ff;
+}
+.confetti:nth-child(4n) {
+  background: var(--win-glow);
+}
+
+@keyframes confetti-fall {
+  to {
+    transform: translateY(1200%) rotate(540deg);
+  }
+}
+
+.splash-title {
+  font-size: clamp(1.8rem, calc(8 * var(--vw)), 3.4rem);
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--win-glow);
+  -webkit-text-stroke: 2px #8a3a00;
+  paint-order: stroke fill;
+  text-shadow: 0 4px 0 #8a3a00;
+}
+
+.splash-plaque {
+  /* Every plaque is the same width, whatever its text. */
+  width: min(100%, 520px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  border: 3px solid #f5b53a;
+  border-radius: 10px;
+  box-shadow: 0 0 14px rgba(245, 181, 58, 0.6);
+}
+.splash-green {
+  background: linear-gradient(#1f9c55, #0b4a26);
+}
+.splash-red {
+  background: linear-gradient(#c8342a, #5e100b);
+}
+.splash-blue {
+  background: linear-gradient(#2a5fd0, #0d2368);
+}
+
+.splash-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.splash-name {
+  white-space: nowrap;
+  font-size: clamp(1.3rem, calc(6 * var(--vw)), 2.6rem);
+  font-weight: 700;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+.splash-featuring {
+  /* No outline: it blurs text this small. */
+  -webkit-text-stroke: 0;
+  font-size: clamp(0.6rem, calc(2 * var(--vw)), 0.85rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #8fc4ff;
+}
+.splash-red .splash-featuring {
+  color: #ffb3c0;
+}
+
+/* "PRIZE BOOST" stands out in gold on the Go Greg plaque. */
+.splash-boost {
+  color: #ffd27a;
+}
+
+/* The gold "+" between two plaques. */
+.splash-plus {
+  /* No height of its own: it sits on the small gap between the plaques, over both edges. */
+  height: 0;
+  margin: calc(-1 * var(--splash-gap) + 2px) 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.splash-plus svg {
+  flex: none;
+  width: clamp(1rem, calc(3.5 * var(--vw)), 1.5rem);
+  height: clamp(1rem, calc(3.5 * var(--vw)), 1.5rem);
+  fill: none;
+  stroke: #ffc23c;
+  stroke-width: 5;
+  stroke-linecap: square;
+  filter: drop-shadow(0 2px 0 #8a3a00);
+}
+
+.splash-green .splash-featuring {
+  color: #b6ffd6;
+}
+
+/* A diamond or coin with a "+1 SPIN" tag under it, as on the Mo' Spins plaque. */
+.splash-tagged {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  font-size: 1.4em;
+  line-height: 1;
+}
+
+.splash-tagged small {
+  font-size: 0.4em;
+  white-space: nowrap;
+}
+
+.splash-press {
+  /* No outline: it blurs text this small. */
+  -webkit-text-stroke: 0;
+  font-size: clamp(0.7rem, calc(2.4 * var(--vw)), 1rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--win-glow);
+}
+
+/* Our own gold coin (the 🪙 emoji is silver on some systems). Sized like an emoji. */
+.coin-art {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+}
+
+.all-pays .coin-art {
+  width: 70%;
+  height: auto;
+}
+
+.coin-pair {
+  display: inline-flex;
+  gap: 1px;
+}
+
+/* ---- Help: paylines page ---- */
+
+.payline-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.payline-grid li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+
+.payline-grid li.first {
+  border-color: var(--win-glow);
+}
+
+.line-num {
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.line-diagram {
+  width: 100%;
+  max-width: 90px;
+}
+
+.line-cell {
+  fill: rgba(255, 255, 255, 0.12);
+}
+
+.line-hit {
+  fill: rgba(255, 216, 77, 0.35);
+}
+
+/* A reel not seen yet on a line known only part way. */
+.line-unknown {
+  fill: rgba(255, 255, 255, 0.55);
+  font-size: 14px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.help-subhead {
+  margin: 14px 0 6px;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.line-path {
+  fill: none;
+  stroke: var(--win-glow);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* ---- Testing switches (local dev build only) ---- */
+
+.dev-cheats {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid #666;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 0.75rem;
+}
+
+/* Inside the box, not on its border. */
+.dev-cheats-title {
+  float: left;
+  padding: 0;
+  margin-bottom: 2px;
+  font-weight: bold;
+}
+
+.dev-cheats-button {
+  margin-top: 4px;
+  font-size: inherit;
+}
+
+/* A symbol drawn as a picture, sized like an emoji. */
+.sym-img {
+  height: 1em;
+  width: auto;
+  vertical-align: middle;
+}
+
+/* On the reels and the bonus board, a picture fills its square (keeping its shape). */
+.reel-cell > .emoji:has(.sym-img) {
+  align-self: stretch;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.reel-cell .sym-img,
+.reel-strip .sym-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/*
+ * On a spinning reel a picture is pinned inside its slot (a percentage height
+ * alone doesn't hold there, so tall pictures grew), with the same margin as a
+ * stopped square so it doesn't change size as the reel stops.
+ */
+.reel-strip span:has(.sym-img) {
+  position: relative;
+}
+
+.reel-strip .sym-img {
+  position: absolute;
+  inset: 0;
+  padding: 6%;
+}
+
+.bonus-tile .sym-img {
+  display: block;
+  width: 90cqi;
+  height: 90cqi;
+  object-fit: contain;
+}
+
+/* The WILD: the coffee cup, with "WILD" across its lower half. */
+.wild-symbol {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wild-symbol.inline {
+  vertical-align: middle;
+}
+
+.reel-cell > .wild-symbol {
+  align-self: stretch;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.reel-cell > .wild-symbol .sym-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wild-word {
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  transform: translate(-50%, -50%);
+  font-family: Fredoka, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.5em;
+  line-height: 1;
+  color: #da1884;
+  text-shadow:
+    1.5px 0 0 #fff,
+    -1.5px 0 0 #fff,
+    0 1.5px 0 #fff,
+    0 -1.5px 0 #fff,
+    1px 1px 0 #fff,
+    -1px 1px 0 #fff,
+    1px -1px 0 #fff,
+    -1px -1px 0 #fff,
+    0 3px 0 #5c2d17;
+}
+
+.wild-symbol.inline .wild-word {
+  font-size: 0.3em;
+  text-shadow: none;
+}
+
+/* In the help's paytable and wild note the cup is bigger, so WILD is big enough to read,
+   with the same white outline as on the reels (scaled to the text). */
+.pay-sym .wild-symbol.inline .sym-img {
+  height: 1.6em;
+}
+.pay-sym .wild-symbol.inline .wild-word {
+  font-size: 0.42em;
+  text-shadow: var(--dunkin-outline);
+}
+
+/* A gem drawn from a picture: the picture replaces the drawn
+   stone; on the reels the prize is written over it. */
+.gem.gem-pic {
+  aspect-ratio: 1.25;
+  filter: none;
+}
+
+.gem.gem-pic::before {
+  display: none;
+}
+
+.gem-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* A 1px white outline (four offset copies), then a strong 5px glow in the gem's colour
+     (a tight bright layer under a softer one). */
+  filter: var(--white-edge) drop-shadow(0 0 2px var(--gem-glow)) drop-shadow(0 0 5px var(--gem-glow));
+}
+
+/* Each gem's glow colour. */
+.gem-red .gem-img {
+  --gem-glow: rgba(255, 90, 70, 0.95);
+}
+
+.gem-blue .gem-img {
+  --gem-glow: rgba(100, 170, 255, 0.95);
+}
+
+.gem-green .gem-img {
+  --gem-glow: rgba(80, 255, 160, 0.95);
+}
+
+/* Its prize is outlined in black, with a slight drop shadow below the outline. */
+.gem-pic .gem-prize {
+  -webkit-text-stroke: 0.1em #000;
+  text-shadow: 0 0.12em 0.08em rgba(0, 0, 0, 0.6);
+}
+
+/* Then the same text again on top, filled with a gradient from its colour to a little
+   darker at the bottom, like the machine's. It covers only the fill, so the outline and
+   shadow underneath stay as they are. */
+.gem-pic .gem-prize::after {
+  content: attr(data-text) / "";
+  position: absolute;
+  inset: 0;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  background: linear-gradient(currentColor 40%, color-mix(in srgb, currentColor 70%, #000));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  pointer-events: none;
+}
+
+/* ---- Behind the reels: a red panel as wide as the banner ---- */
+
+.reels-backdrop {
+  position: absolute;
+  z-index: -1;
+  top: -6px;
+  bottom: -6px;
+  left: 50%;
+  translate: -50% 0;
+  /* As wide as the banner above (the play area's width, at most --play-w). */
+  width: min(100cqw, var(--play-w));
+  border-radius: 0 0 12px 12px;
+  background: var(--panel-red);
+  pointer-events: none;
+}
+
+/* The crest sits in the middle of the banner bar. */
+.banner-crest {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  height: 120%;
+  width: auto;
+  pointer-events: none;
+}
