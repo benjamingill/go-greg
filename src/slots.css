@@ -1,5 +1,16 @@
 /* Go Greg slot machine. Shared tokens and base styles live in src/theme.css. */
 :root {
+  /* The lettering colours (royals, FREE GAMES, WILD, the jackpot game's banner, the Free
+     Games sign): Dunkin' orange and pink with a brown shadow. A theme can swap them (see
+     the [data-theme] rules below). */
+  --brand-orange: #ff671f;
+  --brand-pink: #da1884;
+  --brand-pink-bright: #e11383;
+  --brand-shadow: #5c2d17;
+  --medal-light: #f0409c;
+  --medal-dark: #b80f6c;
+  --scroll-light: #ff7f3a;
+  --scroll-dark: #e8530c;
   --cabinet-text: #fff4ea;
   --reel-text: #2b2b2b;
   --win-glow: #ffd84d;
@@ -22,7 +33,7 @@
      The em one scales with the text. */
   --dunkin-outline-sm:
     1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff, 1px 1px 0 #fff, -1px 1px 0 #fff, 1px -1px 0 #fff,
-    -1px -1px 0 #fff, 0 3px 0 #5c2d17;
+    -1px -1px 0 #fff, 0 3px 0 var(--brand-shadow);
   --dunkin-outline:
     0.05em 0 0 #fff,
     -0.05em 0 0 #fff,
@@ -32,7 +43,7 @@
     -0.035em 0.035em 0 #fff,
     0.035em -0.035em 0 #fff,
     -0.035em -0.035em 0 #fff,
-    0 0.1em 0 #5c2d17;
+    0 0.1em 0 var(--brand-shadow);
   /* The whole machine's width: the narrowest at which the bet buttons and meters still fit
      on one row (measured). */
   --machine-w: 456px;
@@ -44,6 +55,19 @@
   --symbol-fs: clamp(1.6rem, calc(8 * var(--vw)), 3rem);
   --note-fs: clamp(0.4rem, calc(1.5 * var(--vw)), 0.55rem);
   --splash-gap: clamp(6px, calc(1.6 * var(--vw)), 12px);
+}
+
+/* The kittens theme (?theme=kittens): pastels in place of the orange and pink. Lavender
+   for the orange, bubblegum for the pink, and a plum shadow. */
+:root[data-theme="kittens"] {
+  --brand-orange: #9d7bff;
+  --brand-pink: #ff5fa8;
+  --brand-pink-bright: #ff74b6;
+  --brand-shadow: #4a2a63;
+  --medal-light: #ff9cc9;
+  --medal-dark: #e0559a;
+  --scroll-light: #c2adff;
+  --scroll-dark: #8a6cf0;
 }
 
 /*
@@ -1014,15 +1038,15 @@
     -1.5px 1.5px 0 #fff,
     1.5px -1.5px 0 #fff,
     -1.5px -1.5px 0 #fff,
-    0 4px 0 #5c2d17;
+    0 4px 0 var(--brand-shadow);
 }
 .letter-A,
 .letter-Q {
-  color: #ff671f;
+  color: var(--brand-orange);
 }
 .letter-K,
 .letter-J {
-  color: #da1884;
+  color: var(--brand-pink);
 }
 
 /* On the reels, a royal is sized to its square: about two-thirds of its height,
@@ -1046,7 +1070,7 @@
   align-items: center;
   justify-content: center;
   /* Dunkin' orange, outlined in white like the WILD. */
-  color: #ff671f;
+  color: var(--brand-orange);
   font-family: Fredoka, system-ui, sans-serif;
   font-weight: 700;
   font-size: 0.52em;
@@ -2294,7 +2318,7 @@
   /* Above the "Jackpot awarded" overlay (z-index 5), so "You've won!" isn't dimmed by it. */
   position: relative;
   z-index: 6;
-  color: #ff671f;
+  color: var(--brand-orange);
   font-weight: 700;
   font-size: clamp(0.95rem, calc(4.5 * var(--vw)), 1.7rem);
   text-transform: uppercase;
@@ -2304,7 +2328,7 @@
 
 .pick-three {
   /* Dunkin' pink. */
-  color: #e11383;
+  color: var(--brand-pink-bright);
 }
 
 .pick-fit {
@@ -2542,10 +2566,10 @@
   border-radius: 50%;
   border: min(2.2cqh, 1.6cqw) solid #fff;
   box-shadow:
-    inset 0 0 0 3px #ff671f,
+    inset 0 0 0 3px var(--brand-orange),
     0 6px 16px rgba(0, 0, 0, 0.6);
-  background: radial-gradient(circle at 50% 40%, #f0409c, #b80f6c 70%);
-  color: #ff671f;
+  background: radial-gradient(circle at 50% 40%, var(--medal-light), var(--medal-dark) 70%);
+  color: var(--brand-orange);
   font-weight: 700;
   font-size: min(30cqh, 22cqw);
   line-height: 1;
@@ -2564,9 +2588,9 @@
   padding: 7cqh 16px 2.5cqh;
   border: 4px solid #fff;
   border-radius: 14px;
-  background: linear-gradient(#ff7f3a, #e8530c);
+  background: linear-gradient(var(--scroll-light), var(--scroll-dark));
   box-shadow:
-    inset 0 0 0 2px #da1884,
+    inset 0 0 0 2px var(--brand-pink),
     0 6px 16px rgba(0, 0, 0, 0.6);
   text-transform: uppercase;
   text-align: center;
@@ -2574,7 +2598,7 @@
 }
 
 .free-title {
-  color: #da1884;
+  color: var(--brand-pink);
   font-weight: 700;
   font-size: min(13cqh, 9cqw);
   /* A white outline and brown shadow, like the WILD. */
@@ -2670,7 +2694,7 @@
   text-transform: uppercase;
   white-space: nowrap;
   color: #fff;
-  -webkit-text-stroke: calc(0.3em - 2px) #ff671f;
+  -webkit-text-stroke: calc(0.3em - 2px) var(--brand-orange);
   paint-order: stroke fill;
   text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
 }
@@ -3281,7 +3305,7 @@
   font-weight: 700;
   font-size: 0.5em;
   line-height: 1;
-  color: #da1884;
+  color: var(--brand-pink);
   text-shadow:
     1.5px 0 0 #fff,
     -1.5px 0 0 #fff,
@@ -3291,7 +3315,7 @@
     -1px 1px 0 #fff,
     1px -1px 0 #fff,
     -1px -1px 0 #fff,
-    0 3px 0 #5c2d17;
+    0 3px 0 var(--brand-shadow);
 }
 
 .wild-symbol.inline .wild-word {

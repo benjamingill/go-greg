@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 216">
+  <title>Yarn</title>
+  <g stroke="#1a1410" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- A loose strand trailing off -->
+    <path d="M196,160 C220,176 236,196 214,206 C196,212 184,200 170,206" fill="none" stroke="#e8566c" stroke-width="10" />
+    <path d="M196,160 C220,176 236,196 214,206 C196,212 184,200 170,206" fill="none" stroke-width="3" opacity="0.35" />
+    <!-- The ball -->
+    <circle cx="118" cy="108" r="92" fill="#ef6a7f" />
+    <!-- Wound strands -->
+    <g fill="none" stroke="#b8304a" stroke-width="6">
+      <path d="M40,70 C80,90 120,150 150,196" />
+      <path d="M56,46 C100,70 150,140 176,182" />
+      <path d="M84,26 C130,52 180,110 200,150" />
+      <path d="M30,120 C70,120 120,160 120,198" />
+      <path d="M150,24 C120,60 80,110 66,180" />
+      <path d="M190,52 C150,80 110,140 100,196" />
+    </g>
+    <!-- Shine -->
+    <path d="M62,64 C74,46 92,36 108,32" fill="none" stroke="#ffd6de" stroke-width="10" />
+    <circle cx="118" cy="108" r="92" fill="none" />
+  </g>
+</svg>

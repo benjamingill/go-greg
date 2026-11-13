@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 216">
+  <title>Cardboard box</title>
+  <g stroke="#1a1410" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- An orange tail poking out of the top -->
+    <path d="M150,96 C152,60 176,30 204,24 C220,22 226,38 214,44 C194,52 178,72 176,100" fill="#f39a3c" />
+    <path d="M168,60 L186,68 M184,38 L196,50" fill="none" stroke="#c45f12" stroke-width="6" />
+    <!-- Back flaps, open -->
+    <path d="M40,92 L66,52 L190,52 L216,92 Z" fill="#a8703c" />
+    <!-- Box front -->
+    <path d="M30,92 L226,92 L226,200 L30,200 Z" fill="#d49a5c" />
+    <!-- Front flaps, folded out -->
+    <path d="M30,92 L6,132 L104,132 L128,92 Z" fill="#e6b27a" />
+    <path d="M226,92 L250,132 L152,132 L128,92 Z" fill="#e6b27a" />
+    <!-- Tape -->
+    <path d="M128,132 L128,200" fill="none" stroke="#f2d9a8" stroke-width="16" />
+    <path d="M128,132 L128,200" fill="none" stroke-width="3" opacity="0.4" />
+    <!-- A little heart -->
+    <path d="M70,170 C58,158 62,146 72,148 C78,148 80,154 80,156 C80,154 82,148 88,148 C98,146 102,158 90,170 L80,180 Z" fill="#f28aa0" stroke-width="4" />
+  </g>
+</svg>

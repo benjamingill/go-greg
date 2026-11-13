@@ -1,8 +1,6 @@
 import { Fragment } from 'react';
-import greg from '../assets/faces/greg.png';
-import mike from '../assets/faces/mike.png';
-import scott from '../assets/faces/scott.png';
 import type { Extras, GemColor } from '../engine/symbols';
+import { THEME } from '../themes';
 import { Coin } from './art';
 import { Greg } from './Greg';
 
@@ -16,9 +14,9 @@ const PLAQUES: readonly {
   featuring: Featuring;
   face: string;
 }[] = [
-  { extra: 'moSpins', color: 'green', label: "Mo' Spins", featuring: 'spins', face: scott },
-  { extra: 'goGreg', color: 'red', label: 'Go Greg', featuring: 'rows', face: greg },
-  { extra: 'moSymbols', color: 'blue', label: "Mo' Symbols", featuring: 'symbols', face: mike },
+  { extra: 'moSpins', color: 'green', label: "Mo' Spins", featuring: 'spins', face: THEME.faces.scott },
+  { extra: 'goGreg', color: 'red', label: THEME.goName, featuring: 'rows', face: THEME.faces.greg },
+  { extra: 'moSymbols', color: 'blue', label: "Mo' Symbols", featuring: 'symbols', face: THEME.faces.mike },
 ];
 
 const CONFETTI = 14;

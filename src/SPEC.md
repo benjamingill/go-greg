@@ -433,3 +433,18 @@ The game shows state only. On-screen instructions appear only where the real mac
 ## 10. Saving
 
 The balance, denomination, bet, any Free Games in progress, and whether the meters show credits or dollars are saved on the device and restored when the game opens again. A saved bet that isn't one of the denomination's five button amounts falls back to its BET × 1.
+
+---
+
+## 11. Themes
+
+A theme is the same game with different art, picked with `?theme=<name>` in the address (`src/themes.ts`). Without one, or with a name that isn't listed, the game looks as it always has. The theme is read once, when the page loads.
+
+| Theme     | Go name    | Faces                                                                                                 |
+| --------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| (default) | Go Greg    | the photos of Greg, Scott, Mike and Ben                                                               |
+| `kittens` | Go Kittens | cartoon kittens: Greg an orange tabby, Scott a grey tabby in glasses, Mike a tuxedo cat, Ben a calico |
+
+In `kittens` the five picture symbols are kitten things too, each in place of one of the default pictures and paying the same: yarn (salad), fish (donut), toy mouse (steak), food bowl (breadsticks) and box (spaghetti). Their names show on the paytable and in the status line. The WILD is a cartoon paw print (cream fur, pink toe beans) with "WILD" over it, and the jackpot game's 15 picks are paw prints instead of coffee cups (the help page says "Touch any paw print"). The coin crates on the ends of the banner bar are a pink litter box heaped with gold coins. The backdrop is a sunny backyard: blue sky and clouds, white picket fences at the sides, grass and daisies, and a giant pink ball of yarn on a heap of gold coins. The lettering that's orange and pink by default (the royals, FREE GAMES, the WILD, the jackpot game's banner, the Free Games sign) is pastel: lavender for the orange, bubblegum pink for the pink, with a plum shadow in place of the brown.
+
+The Go name is the game's title (the browser tab) and the red extra's name, everywhere it's shown: over its gem heap, on the bonus banner and start splash, and in the help pages. A theme also sets each person's face everywhere it appears: over the gem heaps, on the bonus banner and start splash, Greg on the reels and the bonus board, and the help page. Everything else (the other names, rules, odds) stays the same.
