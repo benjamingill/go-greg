@@ -1,20 +1,21 @@
-import coinCrate from '../assets/coin-crate.png';
-import greg from '../assets/faces/greg.png';
-import mike from '../assets/faces/mike.png';
-import scott from '../assets/faces/scott.png';
 import moundBlue from '../assets/mound-blue.png';
 import moundGreen from '../assets/mound-green.png';
 import moundRed from '../assets/mound-red.png';
 import { jackpotValue } from '../engine/jackpots';
 import type { Tier } from '../engine/prizes';
 import type { Extras, GemColor } from '../engine/symbols';
+import { THEME } from '../themes';
 import { BannerCrest, TIER_NAMES } from './art';
 import { Backdrop } from './Backdrop';
 
 const MOUNDS: Record<GemColor, string> = { red: moundRed, green: moundGreen, blue: moundBlue };
 
 /** Each extra's namesake, shown above its label. */
-const FACES: Record<keyof Extras, string> = { moSpins: scott, goGreg: greg, moSymbols: mike };
+const FACES: Record<keyof Extras, string> = {
+  moSpins: THEME.faces.scott,
+  goGreg: THEME.faces.greg,
+  moSymbols: THEME.faces.mike,
+};
 
 /** A mound of gems of one colour, like the machine's gem piles. */
 function GemHeap({ color, pulse }: { color: GemColor; pulse: string | undefined }) {
@@ -30,7 +31,7 @@ function GemHeap({ color, pulse }: { color: GemColor; pulse: string | undefined 
 /** A crate heaped with gold coins, behind a banner badge that runs across its front. */
 function CoinCrate({ flash }: { flash?: string | undefined }) {
   // A new `flash` key remounts the crate, which plays its flash again.
-  return <img key={flash ?? 'still'} src={coinCrate} alt="" className={`coin-crate${flash ? ' flash' : ''}`} />;
+  return <img key={flash ?? 'still'} src={THEME.crate} alt="" className={`coin-crate${flash ? ' flash' : ''}`} />;
 }
 
 /** All five jackpots on one line, the Grand in the middle. */
@@ -60,7 +61,7 @@ function Plaque({ tier, denom, size }: { tier: Tier; denom: number; size: 'big' 
 
 const FEATURES: readonly { color: GemColor; extra: keyof Extras; label: string }[] = [
   { color: 'green', extra: 'moSpins', label: "Mo' Spins" },
-  { color: 'red', extra: 'goGreg', label: 'Go Greg' },
+  { color: 'red', extra: 'goGreg', label: THEME.goName },
   { color: 'blue', extra: 'moSymbols', label: "Mo' Symbols" },
 ];
 

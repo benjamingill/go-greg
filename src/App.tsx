@@ -1,10 +1,11 @@
 import { type ComponentType, useEffect, useState } from 'react';
 import { load, save } from '.';
 import { SlotsGame } from './SlotsGame';
+import { THEME } from './themes';
 
 /** Casino games. `active` is false while another game is showing. */
 const GAMES: readonly { id: string; label: string; title: string; Game: ComponentType<{ active: boolean }> }[] = [
-  { id: 'slots', label: 'Slots', title: 'Go Greg', Game: SlotsGame },
+  { id: 'slots', label: 'Slots', title: THEME.goName, Game: SlotsGame },
 ];
 
 const LAST_GAME_KEY = 'casino:last-game';
@@ -25,7 +26,7 @@ function Casino() {
 
   useEffect(() => {
     save(LAST_GAME_KEY, current);
-    document.title = GAMES.find((g) => g.id === current)?.title ?? 'Go Greg';
+    document.title = GAMES.find((g) => g.id === current)?.title ?? THEME.goName;
   }, [current]);
 
   return (

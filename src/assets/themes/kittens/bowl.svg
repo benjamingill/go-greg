@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 216">
+  <title>Food bowl</title>
+  <g stroke="#1a1410" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Kibble heaped over the rim -->
+    <path d="M36,104 C46,56 96,36 128,38 C164,36 210,56 220,104 Z" fill="#b8742e" />
+    <g fill="#d99246" stroke-width="5">
+      <circle cx="76" cy="84" r="14" />
+      <circle cx="104" cy="66" r="14" />
+      <circle cx="134" cy="56" r="14" />
+      <circle cx="164" cy="68" r="14" />
+      <circle cx="190" cy="88" r="14" />
+      <circle cx="120" cy="90" r="14" />
+      <circle cx="150" cy="94" r="14" />
+      <circle cx="92" cy="98" r="12" />
+    </g>
+    <!-- Bowl -->
+    <path d="M20,104 L236,104 C232,150 216,190 192,198 L64,198 C40,190 24,150 20,104 Z" fill="#e0483d" />
+    <!-- Rim -->
+    <rect x="14" y="94" width="228" height="22" rx="11" fill="#f2665a" />
+    <!-- Paw print on the front -->
+    <g fill="#ffd8d2" stroke="none">
+      <ellipse cx="128" cy="164" rx="20" ry="16" />
+      <circle cx="102" cy="138" r="8" />
+      <circle cx="120" cy="130" r="8" />
+      <circle cx="138" cy="130" r="8" />
+      <circle cx="156" cy="138" r="8" />
+    </g>
+    <!-- Shine -->
+    <path d="M46,126 C48,146 56,166 68,180" fill="none" stroke="#ff9a90" stroke-width="8" />
+  </g>
+</svg>

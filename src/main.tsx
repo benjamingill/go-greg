@@ -1,8 +1,12 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { THEME_NAME } from './themes';
 import './theme.css';
 import './app.css';
+
+// The theme's own colours (slots.css) hang off this.
+document.documentElement.dataset.theme = THEME_NAME;
 
 const root = document.getElementById('root');
 if (!root) throw new Error('index.html is missing the #root element');

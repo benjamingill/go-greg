@@ -1,14 +1,11 @@
 import { type ReactNode, useState } from 'react';
-import ben from '../assets/faces/ben.png';
-import greg from '../assets/faces/greg.png';
-import mike from '../assets/faces/mike.png';
-import scott from '../assets/faces/scott.png';
 import { growthSteps } from '../engine/bonus';
 import { BONUS_START_SPINS, FREE_GAMES, SCATTER_PAYS } from '../engine/config';
 import { jackpotValue } from '../engine/jackpots';
 import { linesFor, PAYLINES, REELS, ROWS } from '../engine/paylines';
 import { TIERS } from '../engine/prizes';
 import { type GemColor, PAYING, PAYTABLE, WILD_PAYS } from '../engine/symbols';
+import { THEME } from '../themes';
 import { GemPicture, SYMBOL_ART, SYMBOL_NAMES, SymbolIcon, TIER_NAMES } from './art';
 import { Greg } from './Greg';
 
@@ -74,7 +71,7 @@ function PaytablePage() {
   );
 }
 
-const EXTRA_NAMES = { green: "Mo' Spins", red: 'Go Greg', blue: "Mo' Symbols" } as const;
+const EXTRA_NAMES = { green: "Mo' Spins", red: THEME.goName, blue: "Mo' Symbols" } as const;
 
 const COMBOS: readonly (readonly GemColor[])[] = [
   ['green'],
@@ -182,7 +179,7 @@ function BonusPlayPage() {
       </ul>
       <h3 className="help-subhead">5×5 board</h3>
       <GrowthTable rows={5} />
-      <h3 className="help-subhead">8×5 board (Go Greg)</h3>
+      <h3 className="help-subhead">8×5 board ({EXTRA_NAMES.red})</h3>
       <GrowthTable rows={8} />
     </>
   );
@@ -194,7 +191,7 @@ function ExtrasPage() {
       <li>
         <GemPicture color="green" className="mini-gem" /> <strong>{EXTRA_NAMES.green}</strong>: the prize on a coin or
         diamond may be +1 Spin. One more spin is awarded when it is collected. The bonus is played on a 5×5 board unless
-        Go Greg is also in play.
+        {EXTRA_NAMES.red} is also in play.
       </li>
       <li>
         <GemPicture color="red" className="mini-gem" /> <strong>{EXTRA_NAMES.red}</strong>: the bonus is played on an
@@ -204,7 +201,8 @@ function ExtrasPage() {
       </li>
       <li>
         <GemPicture color="blue" className="mini-gem" /> <strong>{EXTRA_NAMES.blue}</strong>: at the start of any spin,
-        5 positions (8 with Go Greg) are randomly selected, and on each of them either 2 coins or 2 diamonds may appear.
+        5 positions (8 with {EXTRA_NAMES.red}) are randomly selected, and on each of them either 2 coins or 2 diamonds
+        may appear.
       </li>
     </ul>
   );
@@ -246,7 +244,8 @@ function JackpotsPage({ denom }: PageProps) {
       <ul className="help-rules">
         <li>Any Wild may randomly trigger the jackpot feature.</li>
         <li>
-          Touch any coffee cup to reveal Grand, Major, Maxi, Minor or Mini. Match 3 to win the corresponding prize.
+          Touch any {THEME.wild.name} to reveal Grand, Major, Maxi, Minor or Mini. Match 3 to win the corresponding
+          prize.
         </li>
         <li>Outcomes of the jackpot feature are not influenced by player input.</li>
         <li>
@@ -349,9 +348,9 @@ function PaylinesPage() {
 
 /** The crew below Greg on the last page, left to right. */
 const CREW = [
-  { face: scott, name: 'Scott', label: "Mo' Scott" },
-  { face: ben, name: 'Ben', label: "Mo' Ben" },
-  { face: mike, name: 'Mike', label: "Mo' Mike" },
+  { face: THEME.faces.scott, name: 'Scott', label: "Mo' Scott" },
+  { face: THEME.faces.ben, name: 'Ben', label: "Mo' Ben" },
+  { face: THEME.faces.mike, name: 'Mike', label: "Mo' Mike" },
 ] as const;
 
 /** The last page: Greg with "Go Greg" under him, then Scott, Ben and Mike in a row, each with their name. */
@@ -359,8 +358,8 @@ function CrewPage() {
   return (
     <div className="help-crew">
       <div className="help-person">
-        <img src={greg} alt="Greg" className="help-face" />
-        <div className="help-name">Go Greg</div>
+        <img src={THEME.faces.greg} alt="Greg" className="help-face" />
+        <div className="help-name">{THEME.goName}</div>
       </div>
       <div className="help-crew-row">
         {CREW.map((c) => (

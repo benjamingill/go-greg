@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 216">
+  <title>Fish</title>
+  <g stroke="#1a1410" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Tail -->
+    <path d="M190,108 L246,54 C252,90 252,126 246,162 Z" fill="#2f86c4" />
+    <!-- Fins -->
+    <path d="M104,58 C116,22 156,24 166,62 Z" fill="#2f86c4" />
+    <path d="M118,156 C126,186 150,190 160,160 Z" fill="#2f86c4" />
+    <!-- Body -->
+    <path d="M12,108 C40,48 120,40 196,108 C120,176 40,168 12,108 Z" fill="#5bb8e8" />
+    <!-- Belly -->
+    <path d="M30,122 C70,156 130,156 176,122 C130,140 70,140 30,122 Z" fill="#cfeefb" stroke="none" />
+    <!-- Scales -->
+    <g fill="none" stroke="#2f86c4" stroke-width="5">
+      <path d="M100,86 C108,96 108,108 100,118" />
+      <path d="M124,80 C132,92 132,112 124,124" />
+      <path d="M148,84 C156,96 156,116 148,128" />
+    </g>
+    <!-- Gill -->
+    <path d="M72,72 C86,92 86,124 72,144" fill="none" stroke-width="6" />
+    <!-- Eye -->
+    <circle cx="46" cy="98" r="14" fill="#fff" stroke-width="5" />
+    <circle cx="49" cy="98" r="7" fill="#1a1410" stroke="none" />
+    <!-- Smile -->
+    <path d="M22,118 C28,124 36,124 42,120" fill="none" stroke-width="5" />
+    <!-- Shine -->
+    <path d="M60,64 C80,54 104,52 124,56" fill="none" stroke="#e8f8ff" stroke-width="8" />
+  </g>
+</svg>

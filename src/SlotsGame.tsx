@@ -32,6 +32,7 @@ import { linesFor, PAYLINES, REELS } from './engine/paylines';
 import { emptyPicks, pickCoin, pickDone, type Revealed } from './engine/pick';
 import { drawGrid, type LineWin } from './engine/spin';
 import type { GemColor } from './engine/symbols';
+import { THEME } from './themes';
 import { tossCoins } from './toss';
 
 const MACHINE_KEY = 'slots:machine-v1';
@@ -471,7 +472,7 @@ export function SlotsGame({ active }: { active: boolean }) {
       className={`slots${show?.stage === 'bonus' || bonusIntro ? ' tall' : ''}${paused ? ' paused' : ''}`}
     >
       {/* The cabinet logo is the visible title; this heading is for screen readers. */}
-      <h1 className="visually-hidden">Go Greg</h1>
+      <h1 className="visually-hidden">{THEME.goName}</h1>
 
       <div className="slots-body">
         <main className="cabinet">

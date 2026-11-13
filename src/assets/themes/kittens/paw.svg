@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 240">
+  <title>Paw print</title>
+  <g stroke="#1a1410" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- The paw: soft cream fur -->
+    <path d="M110,232 C58,232 22,200 22,156 C22,128 34,108 46,96 C30,84 26,58 40,42 C54,26 76,32 84,48 C88,26 104,12 122,14 C140,16 150,34 148,52 C158,36 180,32 192,48 C204,64 198,88 182,98 C194,112 198,132 198,156 C198,200 162,232 110,232 Z" fill="#fbe6cf" />
+    <!-- Main pad -->
+    <path d="M110,212 C76,212 56,192 58,168 C60,146 82,136 96,128 C104,124 116,124 124,128 C138,136 160,146 162,168 C164,192 144,212 110,212 Z" fill="#f28aa0" />
+    <!-- Toe beans -->
+    <ellipse cx="56" cy="104" rx="20" ry="24" fill="#f28aa0" transform="rotate(-20 56 104)" />
+    <ellipse cx="90" cy="64" rx="20" ry="26" fill="#f28aa0" transform="rotate(-8 90 64)" />
+    <ellipse cx="134" cy="64" rx="20" ry="26" fill="#f28aa0" transform="rotate(8 134 64)" />
+    <ellipse cx="166" cy="104" rx="20" ry="24" fill="#f28aa0" transform="rotate(20 166 104)" />
+    <!-- Shine on the pads -->
+    <g fill="#ffd0da" stroke="none">
+      <ellipse cx="88" cy="160" rx="12" ry="7" transform="rotate(-25 88 160)" />
+      <ellipse cx="50" cy="96" rx="5" ry="8" transform="rotate(-20 50 96)" />
+      <ellipse cx="84" cy="54" rx="5" ry="9" />
+      <ellipse cx="128" cy="54" rx="5" ry="9" />
+      <ellipse cx="160" cy="96" rx="5" ry="8" transform="rotate(20 160 96)" />
+    </g>
+  </g>
+</svg>

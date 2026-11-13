@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 216">
+  <title>Toy mouse</title>
+  <g stroke="#1a1410" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Curly tail -->
+    <path d="M196,150 C230,150 246,120 228,100 C212,84 194,100 206,112" fill="none" stroke="#f28aa0" stroke-width="9" />
+    <path d="M196,150 C230,150 246,120 228,100 C212,84 194,100 206,112" fill="none" stroke-width="3" opacity="0.35" />
+    <!-- Body: a teardrop, pointed at the nose -->
+    <path d="M14,150 C40,90 100,54 160,64 C210,72 220,140 196,170 C176,194 60,194 14,150 Z" fill="#a4abb4" />
+    <!-- Belly -->
+    <path d="M34,154 C80,176 160,182 194,164 C170,186 70,188 34,154 Z" fill="#d6dbe0" stroke="none" />
+    <!-- Ear -->
+    <ellipse cx="118" cy="62" rx="34" ry="38" fill="#a4abb4" />
+    <ellipse cx="118" cy="66" rx="20" ry="24" fill="#f7b8c4" stroke="none" />
+    <!-- Eye -->
+    <circle cx="70" cy="112" r="10" fill="#1a1410" stroke="none" />
+    <circle cx="67" cy="108" r="3" fill="#fff" stroke="none" />
+    <!-- Nose and whiskers -->
+    <circle cx="18" cy="148" r="10" fill="#f28aa0" stroke-width="5" />
+    <path d="M30,140 L6,124 M32,150 L2,150 M30,158 L8,172" fill="none" stroke-width="3" />
+    <!-- Stitching -->
+    <path d="M120,100 L124,112 M136,104 L138,116 M152,106 L152,118 M168,110 L166,122" fill="none" stroke="#6b737c" stroke-width="4" />
+  </g>
+</svg>

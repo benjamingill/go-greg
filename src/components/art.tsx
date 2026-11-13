@@ -1,16 +1,11 @@
 import type { ReactNode } from 'react';
-import breadsticks from '../assets/breadsticks.png';
-import coffee from '../assets/coffee.png';
-import donut from '../assets/donut.png';
 import gemBlue from '../assets/gem-blue.png';
 import gemGreen from '../assets/gem-green.png';
 import gemRed from '../assets/gem-red.png';
-import salad from '../assets/salad.png';
-import spaghetti from '../assets/spaghetti.png';
-import steak from '../assets/steak.png';
 import { type Prize, prizeMult, type Tier } from '../engine/prizes';
 import type { Cell } from '../engine/spin';
 import type { GemColor, Sym } from '../engine/symbols';
+import { THEME } from '../themes';
 import { Greg } from './Greg';
 
 /**
@@ -18,11 +13,11 @@ import { Greg } from './Greg';
  * Greg and gems are drawn; Wild and Free Games are just words.
  */
 export const SYMBOL_ART: Record<Exclude<Sym, 'greg' | 'gem' | 'scatter' | 'wild'>, ReactNode> = {
-  salad: <img src={salad} className="sym-img" alt="" />,
-  donut: <img src={donut} className="sym-img" alt="" />,
-  steak: <img src={steak} className="sym-img" alt="" />,
-  breadsticks: <img src={breadsticks} className="sym-img" alt="" />,
-  spaghetti: <img src={spaghetti} className="sym-img" alt="" />,
+  salad: <img src={THEME.pictures.salad.src} className="sym-img" alt="" />,
+  donut: <img src={THEME.pictures.donut.src} className="sym-img" alt="" />,
+  steak: <img src={THEME.pictures.steak.src} className="sym-img" alt="" />,
+  breadsticks: <img src={THEME.pictures.breadsticks.src} className="sym-img" alt="" />,
+  spaghetti: <img src={THEME.pictures.spaghetti.src} className="sym-img" alt="" />,
   A: 'A',
   K: 'K',
   Q: 'Q',
@@ -35,11 +30,11 @@ const WORDS: Record<'scatter', readonly string[]> = {
 };
 
 export const SYMBOL_NAMES: Record<Sym, string> = {
-  salad: 'Salad',
-  donut: 'Donut',
-  steak: 'Steak',
-  breadsticks: 'Breadsticks',
-  spaghetti: 'Spaghetti',
+  salad: THEME.pictures.salad.name,
+  donut: THEME.pictures.donut.name,
+  steak: THEME.pictures.steak.name,
+  breadsticks: THEME.pictures.breadsticks.name,
+  spaghetti: THEME.pictures.spaghetti.name,
   A: 'A',
   K: 'K',
   Q: 'Q',
@@ -80,11 +75,11 @@ export const prizeLabel = (p: Prize, credits: number, bet: number, inCredits: bo
       ? '+1 SPIN'
       : valueText(prizeMult(p), credits, bet, inCredits);
 
-/** The WILD: the coffee cup with "WILD" written over it. `inline` is the small version used in text. */
+/** The WILD: the theme's WILD picture (a coffee cup by default) with "WILD" written over it. `inline` is the small version used in text. */
 function WildSymbol({ inline = false }: { inline?: boolean }) {
   return (
     <span className={`wild-symbol${inline ? ' inline' : ''}`} role="img" aria-label={SYMBOL_NAMES.wild}>
-      <img src={coffee} className="sym-img" alt="" />
+      <img src={THEME.wild.src} className="sym-img" alt="" />
       <span className="wild-word">WILD</span>
     </span>
   );
@@ -188,9 +183,10 @@ export function Coin({ decorative = false }: { decorative?: boolean }) {
   );
 }
 
-/** A coffee cup: the jackpot game's pick. */
+/** The jackpot game's pick: the theme's WILD picture (a coffee cup by default). */
 export function Cup() {
-  return <img src={coffee} className="cup-art" alt="Coffee cup" />;
+  const name = THEME.wild.name;
+  return <img src={THEME.wild.src} className="cup-art" alt={name.charAt(0).toUpperCase() + name.slice(1)} />;
 }
 
 /** One diamond, drawn at (x, y) with width `w`: a flat top over a pointed bottom, with facets. */

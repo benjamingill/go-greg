@@ -1,4 +1,6 @@
-import gregFace from '../assets/faces/greg.png';
+import { THEME } from '../themes';
+
+const gregFace = THEME.faces.greg;
 
 /**
  * Greg: his face, with a white edge and a red glow. With no `size` he fills his box; a
